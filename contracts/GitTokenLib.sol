@@ -12,12 +12,12 @@ library GitTokenLib {
     string organization;
     string symbol;
     mapping(string => uint256) rewardValues;
-    mapping(address => string) contributorEmails;
+    mapping(address => string) contributorUsernames;
     mapping(string => address) contributorAddresses;
     mapping(address => mapping(address => uint)) allowed;
     mapping(address => uint) balances;
     mapping(string => uint) unclaimedRewards;
-    mapping(string => bytes32) emailVerification;
+    mapping(string => bytes32) usernameVerification;
   }
 
   /**/
@@ -52,12 +52,12 @@ library GitTokenLib {
 
   function _rewardContributor (
     Data storage self,
-    string _email,
+    string _username,
     string _rewardType,
     uint _rewardBonus
   ) internal returns (bool) {
     uint _value = self.rewardValues[_rewardType].add(_rewardBonus);
-    address _contributor = self.contributorAddresses[_email];
+    address _contributor = self.contributorAddresses[_username];
 
     if(_value == 0) {
       throw;
@@ -65,7 +65,7 @@ library GitTokenLib {
       self.totalSupply = self.totalSupply.add(_value);
 
       if (_contributor == 0x0){
-        self.unclaimedRewards[_email] = self.unclaimedRewards[_email].add(_value);
+        self.unclaimedRewards[_username] = self.unclaimedRewards[_username].add(_value);
       } else {
         self.balances[_contributor] = self.balances[_contributor].add(_value);
       }
@@ -77,41 +77,41 @@ library GitTokenLib {
   function _verifyContributor(
     Data storage self,
     address _contributor,
-    string _email
+    string _username
   ) internal returns (bool) {
     if (_contributor == 0x0) {
       throw;
     }
 
-    if (self.unclaimedRewards[_email] > 0) {
-      // Transfer all previously unclaimed rewards of an email to an address;
-      // Add to existing balance in case contributor has multiple emails
-      self.balances[_contributor] = self.balances[_contributor].add(self.unclaimedRewards[_email]);
-      self.unclaimedRewards[_email] = 0;
+    if (self.unclaimedRewards[_username] > 0) {
+      // Transfer all previously unclaimed rewards of an username to an address;
+      // Add to existing balance in case contributor has multiple usernames
+      self.balances[_contributor] = self.balances[_contributor].add(self.unclaimedRewards[_username]);
+      self.unclaimedRewards[_username] = 0;
     }
-    self.contributorEmails[_contributor] = _email;
-    self.contributorAddresses[_email] = _contributor;
+    self.contributorUsernames[_contributor] = _username;
+    self.contributorAddresses[_username] = _contributor;
     return true;
   }
 
 
   function _setContributor(
     Data storage self,
-    string _email,
+    string _username,
     bytes _code
   ) internal returns (bool) {
-    if (self.emailVerification[_email] != keccak256(_code)) {
+    if (self.usernameVerification[_username] != keccak256(_code)) {
       throw;
     }
 
-    if (self.unclaimedRewards[_email] > 0) {
-      // Transfer all previously unclaimed rewards of an email to an address;
-      // Add to existing balance in case contributor has multiple emails
-      self.balances[msg.sender] = self.balances[msg.sender].add(self.unclaimedRewards[_email]);
-      self.unclaimedRewards[_email] = 0;
+    if (self.unclaimedRewards[_username] > 0) {
+      // Transfer all previously unclaimed rewards of an username to an address;
+      // Add to existing balance in case contributor has multiple usernames
+      self.balances[msg.sender] = self.balances[msg.sender].add(self.unclaimedRewards[_username]);
+      self.unclaimedRewards[_username] = 0;
     }
-    self.contributorEmails[msg.sender] = _email;
-    self.contributorAddresses[_email] = msg.sender;
+    self.contributorUsernames[msg.sender] = _username;
+    self.contributorAddresses[_username] = msg.sender;
     return true;
   }
 

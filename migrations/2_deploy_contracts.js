@@ -3,7 +3,7 @@ const GitToken = artifacts.require('./GitToken.sol');
 
 const {
   contributorAddress,
-  email,
+  username,
   organization,
   symbol,
   decimals
@@ -14,7 +14,7 @@ module.exports = function(deployer) {
   deployer.link(GitTokenLib, GitToken);
   GitToken.new(
     contributorAddress,
-    email,
+    username,
     organization,
     symbol,
     decimals

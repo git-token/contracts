@@ -18,7 +18,7 @@ contract GitToken is Ownable {
 
   function GitToken(
     address _contributor,
-    string _email,
+    string _username,
     string _organization,
     string _symbol,
     uint _decimals
@@ -28,10 +28,10 @@ contract GitToken is Ownable {
     gittoken.organization = _organization;
     gittoken.symbol = _symbol;
     gittoken.decimals = _decimals;
-    // Set initial contributor email & address
-    gittoken.contributorEmails[msg.sender] = _email;
-    gittoken.contributorEmails[_contributor] = _email;
-    gittoken.contributorAddresses[_email] = _contributor;
+    // Set initial contributor username & address
+    gittoken.contributorUsernames[msg.sender] = _username;
+    gittoken.contributorUsernames[_contributor] = _username;
+    gittoken.contributorAddresses[_username] = _contributor;
 
     // Set default rewardValues -- Note, these values are not solidified and are untested as to their effectiveness of incentivization;
     // These values are customizable using setRewardValue(uint256 value, string type)
@@ -206,10 +206,10 @@ contract GitToken is Ownable {
     return true;
   }
 
-  function verifyContributor(address _contributor, string _email) onlyOwner public returns (bool) {
-    /*gittoken.emailVerification[_email] = keccak256(_code);
+  function verifyContributor(address _contributor, string _username) onlyOwner public returns (bool) {
+    /*gittoken.usernameVerification[_username] = keccak256(_code);
     return true;*/
-    if(!gittoken._verifyContributor(_contributor, _email)) {
+    if(!gittoken._verifyContributor(_contributor, _username)) {
       throw;
     } else {
       ContributorVerified(_contributor, now);
@@ -218,8 +218,8 @@ contract GitToken is Ownable {
 
   }
 
-  function setContributor(string _email, bytes _code) public returns (bool) {
-    if (!gittoken._setContributor(_email, _code)) {
+  function setContributor(string _username, bytes _code) public returns (bool) {
+    if (!gittoken._setContributor(_username, _code)) {
       throw;
     } else {
       return true;
@@ -227,14 +227,14 @@ contract GitToken is Ownable {
   }
 
   function rewardContributor(
-    string _email,
+    string _username,
     string _rewardType,
     uint _rewardBonus
   ) onlyOwner public returns (bool) {
-    if(!gittoken._rewardContributor(_email, _rewardType, _rewardBonus)) {
+    if(!gittoken._rewardContributor(_username, _rewardType, _rewardBonus)) {
       throw;
     } else {
-      address _contributor = gittoken.contributorAddresses[_email];
+      address _contributor = gittoken.contributorAddresses[_username];
       uint _value = gittoken.rewardValues[_rewardType].add(_rewardBonus);
       Contribution(_contributor, _value, now, _rewardType);
       return true;
@@ -250,12 +250,12 @@ contract GitToken is Ownable {
     return gittoken.rewardValues[_rewardType];
   }
 
-  function getContributorAddress(string _email) constant returns (address) {
-    return gittoken.contributorAddresses[_email];
+  function getContributorAddress(string _username) constant returns (address) {
+    return gittoken.contributorAddresses[_username];
   }
 
-  function getUnclaimedRewards(string _email) constant returns (uint) {
-    return gittoken.unclaimedRewards[_email];
+  function getUnclaimedRewards(string _username) constant returns (uint) {
+    return gittoken.unclaimedRewards[_username];
   }
 
   function getOrganization() constant returns (string) {
