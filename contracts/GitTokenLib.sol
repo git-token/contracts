@@ -18,6 +18,7 @@ library GitTokenLib {
     mapping(address => uint) balances;
     mapping(string => uint) unclaimedRewards;
     mapping(string => bytes32) usernameVerification;
+    mapping(string => bool) receivedDelivery;
   }
 
   /**/
@@ -54,12 +55,15 @@ library GitTokenLib {
     Data storage self,
     string _username,
     string _rewardType,
-    uint _rewardBonus
+    uint _rewardBonus,
+    string _deliveryID
   ) internal returns (bool) {
     uint _value = self.rewardValues[_rewardType].add(_rewardBonus);
     address _contributor = self.contributorAddresses[_username];
 
     if(_value == 0) {
+      throw;
+    } else if (self.receivedDelivery[_deliveryID] == true) {
       throw;
     } else {
       self.totalSupply = self.totalSupply.add(_value);
@@ -70,6 +74,7 @@ library GitTokenLib {
         self.balances[_contributor] = self.balances[_contributor].add(_value);
       }
 
+      self.receivedDelivery[_deliveryID] = true;
       return true;
     }
   }

@@ -229,9 +229,10 @@ contract GitToken is Ownable {
   function rewardContributor(
     string _username,
     string _rewardType,
-    uint _rewardBonus
+    uint _rewardBonus,
+    string _deliveryID
   ) onlyOwner public returns (bool) {
-    if(!gittoken._rewardContributor(_username, _rewardType, _rewardBonus)) {
+    if(!gittoken._rewardContributor(_username, _rewardType, _rewardBonus, _deliveryID)) {
       throw;
     } else {
       address _contributor = gittoken.contributorAddresses[_username];
@@ -256,10 +257,6 @@ contract GitToken is Ownable {
 
   function getUnclaimedRewards(string _username) constant returns (uint) {
     return gittoken.unclaimedRewards[_username];
-  }
-
-  function getOrganization() constant returns (string) {
-    return gittoken.organization;
   }
 
   /**
