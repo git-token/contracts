@@ -255,6 +255,10 @@ contract GitToken is Ownable {
     return gittoken.contributorAddresses[_username];
   }
 
+  function getContributorUsername(address _contributorAddress) constant returns (string) {
+    return gittoken.contributorUsernames[_contributorAddress];
+  }
+
   function getUnclaimedRewards(string _username) constant returns (uint) {
     return gittoken.unclaimedRewards[_username];
   }
