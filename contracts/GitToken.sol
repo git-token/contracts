@@ -13,7 +13,7 @@ contract GitToken is Ownable {
   event Approval(address indexed owner, address indexed spender, uint value);
   event Transfer(address indexed from, address indexed to, uint value);
   event Contribution(address indexed contributor, uint value, uint date, string rewardType);
-  event ContributorVerified(address indexed contributor, uint date);
+  event ContributorVerified(address indexed contributor, string username, uint date);
   /*event ConfigUpdated();*/
 
   function GitToken(
@@ -212,7 +212,7 @@ contract GitToken is Ownable {
     if(!gittoken._verifyContributor(_contributor, _username)) {
       throw;
     } else {
-      ContributorVerified(_contributor, now);
+      ContributorVerified(_contributor, _username, now);
       return true;
     }
 
