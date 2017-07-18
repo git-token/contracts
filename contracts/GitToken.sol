@@ -18,6 +18,7 @@ contract GitToken is Ownable {
 
   function GitToken(
     address _contributor,
+    string _name,
     string _username,
     string _organization,
     string _symbol,
@@ -25,6 +26,7 @@ contract GitToken is Ownable {
   ) {
     if (_contributor != 0x0) { owner[_contributor] = true; }
     gittoken.totalSupply = 0;
+    gittoken.name = _name;
     gittoken.organization = _organization;
     gittoken.symbol = _symbol;
     gittoken.decimals = _decimals;
@@ -150,6 +152,10 @@ contract GitToken is Ownable {
 
   function organization() constant returns (string) {
     return gittoken.organization;
+  }
+
+  function name() constant returns (string) {
+    return gittoken.name;
   }
 
   function symbol() constant returns (string) {
