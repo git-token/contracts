@@ -114,10 +114,10 @@ contract GitToken is Ownable {
     gittoken.rewardValues['pull_request_review_comment'] = 250 * 10**_decimals;
 
     // Any time a pull request review is submitted, edited, or dismissed.
-    gittoken.rewardValues['pull_request_review']         = 100 * 10**_decimals;
+    gittoken.rewardValues['pull_request_review']         = 250 * 10**_decimals;
 
     // Any time a pull request is assigned, unassigned, labeled, unlabeled, opened, edited, closed, reopened, or synchronized (updated due to a new push in the branch that the pull request is tracking). Also any time a pull request review is requested, or a review request is removed.
-    gittoken.rewardValues['pull_request']                = 250 * 10**_decimals;
+    gittoken.rewardValues['pull_request']                = 2500 * 10**_decimals;
 
     // Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted. This is the default event.
     gittoken.rewardValues['push']                        = 1000 * 10**_decimals;
