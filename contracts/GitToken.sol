@@ -12,7 +12,7 @@ contract GitToken is Ownable {
 
   event Approval(address indexed owner, address indexed spender, uint value);
   event Transfer(address indexed from, address indexed to, uint value);
-  event Contribution(address indexed contributor, uint value, uint date, string rewardType);
+  event Contribution(address indexed contributor, string username, uint value, uint date, string rewardType);
   event ContributorVerified(address indexed contributor, string username, uint date);
   /*event ConfigUpdated();*/
 
@@ -93,16 +93,16 @@ contract GitToken is Ownable {
     gittoken.rewardValues['organization']                = 1000 * 10**_decimals;
 
     // Any time an organization blocks or unblocks a user. Organization hooks only.
-    gittoken.rewardValues['orgBlock']                    = 0 * 10**_decimals;
+    gittoken.rewardValues['org_block']                    = 0 * 10**_decimals;
 
      // Any time a Pages site is built or results in a failed build.
-    gittoken.rewardValues['pageBuild']                   = 500 * 10**_decimals;
+    gittoken.rewardValues['page_build']                   = 500 * 10**_decimals;
 
     // Any time a Project Card is created, edited, moved, converted to an issue,
-    gittoken.rewardValues['projectCard']                 = 250 * 10**_decimals;
+    gittoken.rewardValues['project_card']                 = 250 * 10**_decimals;
 
     // Any time a Project Column is created, edited, moved, or deleted.
-    gittoken.rewardValues['projectColumn']               = 50 * 10**_decimals;
+    gittoken.rewardValues['project_column']               = 50 * 10**_decimals;
 
     // Any time a Project is created, edited, closed, reopened, or deleted.
     gittoken.rewardValues['project']                     = 1000 * 10**_decimals;
@@ -243,7 +243,7 @@ contract GitToken is Ownable {
     } else {
       address _contributor = gittoken.contributorAddresses[_username];
       uint _value = gittoken.rewardValues[_rewardType].add(_rewardBonus);
-      Contribution(_contributor, _value, now, _rewardType);
+      Contribution(_contributor, _username, _value, now, _rewardType);
       return true;
     }
   }
