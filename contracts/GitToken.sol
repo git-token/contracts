@@ -42,7 +42,7 @@ contract GitToken is Ownable {
     gittoken.rewardValues['ping']                        = 2500 * 10**_decimals;
 
     // Any time a Commit is commented on.
-    gittoken.rewardValues['commitComment']               = 250 * 10**_decimals;
+    gittoken.rewardValues['commit_comment']              = 250 * 10**_decimals;
 
      // Any time a Branch or Tag is created.
     gittoken.rewardValues['create']                      = 2500 * 10**_decimals;
@@ -54,7 +54,7 @@ contract GitToken is Ownable {
     gittoken.rewardValues['deployment']                  = 5000 * 10**_decimals;
 
     // Any time a deployment for a Repository has a status update
-    gittoken.rewardValues['deploymentStatus']            = 100 * 10**_decimals;
+    gittoken.rewardValues['deployment_status']           = 100 * 10**_decimals;
 
     // Any time a Repository is forked.
     gittoken.rewardValues['fork']                        = 5000 * 10**_decimals;
@@ -66,10 +66,10 @@ contract GitToken is Ownable {
     gittoken.rewardValues['installation']                = 250 * 10**_decimals;
 
     // Any time a repository is added or removed from an organization (? check this)
-    gittoken.rewardValues['installationRepositories']    = 1000 * 10**_decimals;
+    gittoken.rewardValues['installation_repositories']   = 1000 * 10**_decimals;
 
      // Any time a comment on an issue is created, edited, or deleted.
-    gittoken.rewardValues['issueComment']                = 250 * 10**_decimals;
+    gittoken.rewardValues['issue_comment']               = 250 * 10**_decimals;
 
     // Any time an Issue is assigned, unassigned, labeled, unlabeled, opened, edited,
     gittoken.rewardValues['issues']                      = 500 * 10**_decimals;
@@ -78,7 +78,7 @@ contract GitToken is Ownable {
     gittoken.rewardValues['label']                       = 100 * 10**_decimals;
 
     // Any time a user purchases, cancels, or changes their GitHub
-    gittoken.rewardValues['marketplacePurchase']         = 0 * 10**_decimals;
+    gittoken.rewardValues['marketplace_purchases']       = 0 * 10**_decimals;
 
     // Any time a User is added or removed as a collaborator to a Repository, or has
     gittoken.rewardValues['member']                      = 1000 * 10**_decimals;
