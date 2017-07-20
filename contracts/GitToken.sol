@@ -87,7 +87,7 @@ contract GitToken is Ownable {
     gittoken.rewardValues['membership']                  = 1000 * 10**_decimals;
 
     // Any time a Milestone is created, closed, opened, edited, or deleted.
-    gittoken.rewardValues['milestone']                   = 15000 * 10**_decimals;
+    gittoken.rewardValues['milestone']                   = 250 * 10**_decimals;
 
     // Any time a user is added, removed, or invited to an Organization.
     gittoken.rewardValues['organization']                = 1000 * 10**_decimals;
@@ -236,9 +236,10 @@ contract GitToken is Ownable {
     string _username,
     string _rewardType,
     uint _rewardBonus,
+    uint _reservedValue,
     string _deliveryID
   ) onlyOwner public returns (bool) {
-    if(!gittoken._rewardContributor(_username, _rewardType, _rewardBonus, _deliveryID)) {
+    if(!gittoken._rewardContributor(_username, _rewardType, _rewardBonus, _reservedValue, _deliveryID)) {
       throw;
     } else {
       address _contributor = gittoken.contributorAddresses[_username];

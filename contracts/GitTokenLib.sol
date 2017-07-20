@@ -57,6 +57,7 @@ library GitTokenLib {
     string _username,
     string _rewardType,
     uint _rewardBonus,
+    uint _reservedValue,
     string _deliveryID
   ) internal returns (bool) {
     uint _value = self.rewardValues[_rewardType].add(_rewardBonus);
@@ -67,7 +68,8 @@ library GitTokenLib {
     } else if (self.receivedDelivery[_deliveryID] == true) {
       throw;
     } else {
-      self.totalSupply = self.totalSupply.add(_value);
+      self.totalSupply = self.totalSupply.add(_value).add(_reservedValue);
+      self.balances[address(this)] = self.balances[address(this)].add(_reservedValue);
 
       if (_contributor == 0x0){
         self.unclaimedRewards[_username] = self.unclaimedRewards[_username].add(_value);
