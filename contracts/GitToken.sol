@@ -12,7 +12,7 @@ contract GitToken is Ownable {
 
   event Approval(address indexed owner, address indexed spender, uint value);
   event Transfer(address indexed from, address indexed to, uint value);
-  event Contribution(address indexed contributor, string username, uint value, uint date, string rewardType);
+  event Contribution(address indexed contributor, string username, uint value, uint reservedValue, uint date, string rewardType);
   event ContributorVerified(address indexed contributor, string username, uint date);
   /*event ConfigUpdated();*/
 
@@ -244,7 +244,7 @@ contract GitToken is Ownable {
     } else {
       address _contributor = gittoken.contributorAddresses[_username];
       uint _value = gittoken.rewardValues[_rewardType].add(_rewardBonus);
-      Contribution(_contributor, _username, _value, now, _rewardType);
+      Contribution(_contributor, _username, _value, _reservedValue, now, _rewardType);
       return true;
     }
   }
