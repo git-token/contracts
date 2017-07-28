@@ -60,7 +60,7 @@ contract GitToken is Ownable {
     gittoken.rewardValues['fork']                        = 5000 * 10**_decimals;
 
      // Any time a Wiki page is updated.
-    gittoken.rewardValues['gollum']                      = 250 * 10**_decimals;
+    gittoken.rewardValues['gollum']                      = 100 * 10**_decimals;
 
     // Any time a GitHub App is installed or uninstalled.
     gittoken.rewardValues['installation']                = 250 * 10**_decimals;
@@ -138,7 +138,7 @@ contract GitToken is Ownable {
     gittoken.rewardValues['team_add']                    = 2000 * 10**_decimals;
 
     // Any time a User stars a Repository.
-    gittoken.rewardValues['watch']                       = 500 * 10**_decimals;
+    gittoken.rewardValues['watch']                       = 100 * 10**_decimals;
 
   }
 
