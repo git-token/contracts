@@ -14,7 +14,7 @@ contract GitToken is Ownable {
   event Transfer(address indexed from, address indexed to, uint value);
   event Contribution(address indexed contributor, string username, uint value, uint reservedValue, uint date, string rewardType);
   event ContributorVerified(address indexed contributor, string username, uint date);
-  /*event ConfigUpdated();*/
+  event RewardValueSet(string rewardType, string reservedType, uint value, uint date);
 
   function GitToken(
     address _contributor,
@@ -110,15 +110,17 @@ contract GitToken is Ownable {
     string _rewardType
   ) onlyOwner public returns (bool) {
     gittoken.rewardValues[_rewardType] = _rewardValue;
+    RewardValueSet(_rewardType, '', _rewardValue, now);
     return true;
   }
 
   function setReservedValue(
     uint256 _reservedValue,
-    string _reservedType,
-    string _reservedSubType
+    string _rewardType,
+    string _reservedType
   ) onlyOwner public returns (bool) {
-    gittoken.reservedValues[_reservedType][_reservedSubType] = _reservedValue;
+    gittoken.reservedValues[_rewardType][_reservedType] = _reservedValue;
+    RewardValueSet(_rewardType, _reservedType, _reservedValue, now);
     return true;
   }
 
