@@ -56,7 +56,7 @@ contract GitToken is Ownable {
    * @param reservedType string GitHub web hook action type (a subtype of rewardType; e.g. organization -> member_added),
    * @param value        uint   Updated value of reward or reserved Type
    * @param date         uint   Unix timestamp when reward values are reset
-   * NOTE: This may event is used by `setRewardValue()` and `setReservedValue()` methods
+   * NOTE: This event is used by `setRewardValue()` and `setReservedValue()` methods
    */
   event RewardValueSet(string rewardType, string reservedType, uint value, uint date);
 
