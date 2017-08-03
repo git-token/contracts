@@ -35,11 +35,11 @@ contract GitToken is Ownable {
     gittoken.contributorUsernames[_contributor] = _username;
     gittoken.contributorAddresses[_username] = _contributor;
 
-    if(!gittoken._initRewardValues(_decimals)) {
+    /*if(!gittoken._initRewardValues(_decimals)) {
       throw;
     } else if(!gittoken._initReservedValues(_decimals)) {
       throw;
-    }
+    }*/
 
   }
 
