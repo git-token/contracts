@@ -4,18 +4,38 @@ import './SafeMath.sol';
 import './GitTokenLib.sol';
 import './Ownable.sol';
 
+
+/**
+ * @title GitToken Contract for distributing ERC20 tokens for Git contributions;
+ * @author Ryan Michael Tate
+ */
 contract GitToken is Ownable {
 
   using SafeMath for uint;
   using GitTokenLib for GitTokenLib.Data;
   GitTokenLib.Data gittoken;
 
+  /**
+   * Approval Event
+   * @param owner   address Ethereum address of owner of tokens,
+   * @param spender address Ethereum address of approved spender of tokens,
+   * @param value   uint Number of tokens to approve spender for;
+   */
   event Approval(address indexed owner, address indexed spender, uint value);
   event Transfer(address indexed from, address indexed to, uint value);
   event Contribution(address indexed contributor, string username, uint value, uint reservedValue, uint date, string rewardType);
   event ContributorVerified(address indexed contributor, string username, uint date);
   event RewardValueSet(string rewardType, string reservedType, uint value, uint date);
 
+  /**
+   * @dev Constructor method for GitToken Contract,
+   * @param _contributor  address Ethereum Address of the primary contributor or organization owner,
+   * @param _name         string  Name of the GitToken contract (name of organization),
+   * @param _username     string  GitHub username of the primary contributor or organization owner,
+   * @param _organization string  GitHub Organization as it appears in the GitHub organization URL (e.g. https://GitHub.com/git-token),
+   * @param _symbol       string  Symbol of the GitToken contract,
+   * @param _decimals     uint    Number of decimal representation for token balances;
+   */
   function GitToken(
     address _contributor,
     string _name,
