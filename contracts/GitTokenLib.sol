@@ -227,9 +227,9 @@ library GitTokenLib {
     self.reservedValues['milestone']['created'] = 0;
 
     // Anytime a new member is invited to an organization
-    self.reservedValues['organization']['member_invited']  = 0;
+    self.reservedValues['organization']['member_invited'] = 0;
     // Anytime a new member is added to an organization
-    self.reservedValues['organization']['member_added']  = 15000 * 10**_decimals;
+    self.reservedValues['organization']['member_added'] = 15000 * 10**_decimals;
     return true;
   }
 

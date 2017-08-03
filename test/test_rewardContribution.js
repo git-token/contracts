@@ -55,5 +55,36 @@ contract('GitToken', function(accounts) {
         assert.equal(error, null, error.message)
       })
     })
+
+    it("Should prevent duplicate GitHub web hook events from rewarding tokens", function() {
+      var gittoken;
+      return initContract().then((contract) => {
+        gittoken = contract
+
+        return gittoken.verifyContributor(contributorAddress, username)
+      }).then(function(event) {
+        const { logs } = event
+        assert.equal(logs[0]['event'], "ContributorVerified", "Expected a `ContributorVerified` event")
+
+        return gittoken.rewardContributor(username, "create", "", 0, "00000000-0000-0000-0000-000000000000")
+      }).then(function(event){
+        const { logs } = event
+        assert.equal(logs.length, 1, "Expect a logged event")
+        assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
+
+        return gittoken.rewardContributor(username, "create", "", 0, "00000000-0000-0000-0000-000000000000")
+      }).then(function(event){
+        const { logs } = event
+        assert.equal(logs.length, 0, "Expected a thrown event")
+
+        return gittoken.balanceOf(contributorAddress)
+      }).then(function(balance) {
+        assert.equal(balance.toNumber(), 2500 * Math.pow(10, decimals), "Expected balance to be 2500")
+
+      }).catch(function(error) {
+        assert.equal(error, null, error.message)
+      })
+    })
+
   })
 })

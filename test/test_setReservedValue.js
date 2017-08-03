@@ -21,28 +21,28 @@ function initContract() {
 }
 
 contract('GitToken', function(accounts) {
-  describe('GitToken::setRewardValue', function() {
+  describe('GitToken::setReservedValue', function() {
 
-    it("Should set the reward value from `2500` to `1000` for `create` event", function() {
+    it("Should set the reserve value from `0` to `15000` for `milestone` `created` event", function() {
       var gittoken;
       return initContract().then((contract) => {
         gittoken = contract
 
-        return gittoken.setRewardValue(1000 * Math.pow(10, decimals), "create")
+        return gittoken.setReservedValue(15000 * Math.pow(10, decimals), "milestone", "created")
       }).then(function(event){
         const { logs } = event
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "RewardValueSet", "Expected a `RewardValueSet` event")
 
-        return gittoken.rewardContributor(username, "create", "", 0, "00000000-0000-0000-0000-000000000000")
+        return gittoken.rewardContributor(username, "milestone", "created", 0, "00000000-0000-0000-0000-000000000000")
       }).then(function(event){
         const { logs } = event
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.getUnclaimedRewards(username)
-      }).then(function(unclaimedRewards) {
-        assert.equal(unclaimedRewards.toNumber(), 1000 * Math.pow(10, decimals), "Expected Unclaimed Rewards of contributor to be 1000 * Math.pow(10, decimals)")
+        return gittoken.balanceOf(gittoken.address)
+      }).then(function(balance) {
+        assert.equal(balance.toNumber(), 15000 * Math.pow(10, decimals), "Expected Unclaimed Rewards of contributor to be 15000 * Math.pow(10, decimals)")
 
       }).catch(function(error) {
         assert.equal(error, null, error.message)
