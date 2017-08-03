@@ -96,38 +96,73 @@ contract GitToken is Ownable {
 
   }
 
-  function totalSupply() constant returns (uint) {
+  /**
+   * @dev Returns the current total supply of tokens issued
+   * @return _supply uint Supply of tokens currently issued
+   * NOTE: Remember to adjust supply for decimals representation (e.g. supply / 10 ** decimals)
+   * NOTE: ERC20 standard method
+   */
+  function totalSupply() constant returns (uint _supply) {
     return gittoken.totalSupply;
   }
 
-  function decimals() constant returns (uint) {
+  /**
+   * @dev Returns the number of decimal places to adjust token values
+   * @return _decimals uint Number of decimal places
+   * NOTE: Remember to adjust token values for decimals representation (e.g. value / 10 ** decimals)
+   */
+  function decimals() constant returns (uint _decimals) {
     return gittoken.decimals;
   }
 
-  function organization() constant returns (string) {
+  /**
+   * @dev Returns the string of the GitHub organization associated with the contract
+   * @return _organization string GitHub organization (e.g. git-token)
+   * NOTE: This value is used to make GitHub API calls; it must be associated with
+   * the GitHub organization the web hook has been configured for.
+   */
+  function organization() constant returns (string _organization) {
     return gittoken.organization;
   }
 
-  function name() constant returns (string) {
+  /**
+   * @dev Returns the string of the token contract name
+   * @return _name string Name of the token contract
+   */
+  function name() constant returns (string _name) {
     return gittoken.name;
   }
 
-  function symbol() constant returns (string) {
+  /**
+   * @dev Returns the string of the token contract symbol
+   * @return _symbol string Symbol of the token contract
+   */
+  function symbol() constant returns (string _symbol) {
     return gittoken.symbol;
   }
-  /*
-   * ERC20 Methods
+
+  /**
+   * @dev Returns the balance of tokens associated with the address provided
+   * @param  _holder      address Ethereum address to find token balance for
+   * @return _balance     uint    Value of tokens held by ethereum address
+   */
+  function balanceOf(address _holder) constant returns (uint _balance) {
+    return gittoken.balances[_holder];
+  }
+
+  /**
+   * @dev ERC20 Transfer Method | Transfer tokens to account from sender account
+   * @param  _to      address Ethereum address to transfer tokens to,
+   * @param  _value   uint    Number of tokens to transfer,
+   * @return          bool    Returns boolean value if method is called
    */
   function transfer(address _to, uint _value) public onlyPayloadSize(2 * 32) returns (bool) {
     if(!gittoken._transfer(_to, _value)) {
       throw;
     } else {
       Transfer(msg.sender, _to, _value);
+      return true;
     }
-  }
-
-  function balanceOf(address _contributor) constant returns (uint) {
-    return gittoken.balances[_contributor];
   }
 
   function transferFrom(address _from, address _to, uint _value) public onlyPayloadSize(3 * 32) {
