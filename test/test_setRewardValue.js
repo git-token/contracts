@@ -21,17 +21,18 @@ function initContract() {
 }
 
 contract('GitToken', function(accounts) {
-  describe('GitToken::verifyContributor', function() {
+  describe('GitToken::rewardContributor', function() {
 
-    it("Should verify the contributor, reward the contributor, update the contributor's balance, and show 0 unclaimed rewards for the contributor", function() {
+    it("Should set the reward value from `2500` to `1000` for `create` event", function() {
       var gittoken;
       return initContract().then((contract) => {
         gittoken = contract
 
-        return gittoken.verifyContributor(contributorAddress, username)
-      }).then(function(event) {
+        return gittoken.setRewardValue(1000 * Math.pow(10, decimals), "create")
+      }).then(function(event){
         const { logs } = event
-        assert.equal(logs[0]['event'], "ContributorVerified", "Expected a `ContributorVerified` event")
+        assert.equal(logs.length, 1, "Expect a logged event")
+        assert.equal(logs[0]['event'], "RewardValueSet", "Expected a `RewardValueSet` event")
 
         return gittoken.rewardContributor(username, "create", "", 0, "00000000-0000-0000-0000-000000000000")
       }).then(function(event){
@@ -39,13 +40,9 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.balanceOf.call(contributorAddress)
-      }).then(function(balance) {
-        assert.equal(balance.toNumber(), 2500 * Math.pow(10, decimals), "Expected balance of contributor to be 2500 * Math.pow(10, decimals)")
-
         return gittoken.getUnclaimedRewards(username)
       }).then(function(unclaimedRewards) {
-        assert.equal(unclaimedRewards.toNumber(), 0, "Expected Unclaimed Rewards of contributor to be 0")
+        assert.equal(unclaimedRewards.toNumber(), 1000 * Math.pow(10, decimals), "Expected Unclaimed Rewards of contributor to be 1000 * Math.pow(10, decimals)")
 
       }).catch(function(error) {
         assert.equal(error, null, error.message)

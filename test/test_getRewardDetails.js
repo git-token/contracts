@@ -31,7 +31,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 250 * Math.pow(10, decimals), "Value did not equal 250 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -42,7 +42,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 1000 * Math.pow(10, decimals), "Value did not equal 1000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 15000 * Math.pow(10, decimals), "Value did not equal 15000 * Math.pow(10, decimals)");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -53,7 +53,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 2500 * Math.pow(10, decimals), "Value did not equal 2500 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -64,7 +64,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 250 * Math.pow(10, decimals), "Value did not equal 250 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -75,7 +75,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 2500 * Math.pow(10, decimals), "Value did not equal 2500 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -86,7 +86,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 0 * Math.pow(10, decimals), "Value did not equal 0 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -97,7 +97,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 5000 * Math.pow(10, decimals), "Value did not equal 5000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -108,7 +108,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 100 * Math.pow(10, decimals), "Value did not equal 100 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -119,7 +119,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 5000 * Math.pow(10, decimals), "Value did not equal 5000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -130,7 +130,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 100 * Math.pow(10, decimals), "Value did not equal 100 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -141,7 +141,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 250 * Math.pow(10, decimals), "Value did not equal 250 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -152,7 +152,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 1000 * Math.pow(10, decimals), "Value did not equal 1000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -163,7 +163,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 250 * Math.pow(10, decimals), "Value did not equal 250 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -174,7 +174,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 500 * Math.pow(10, decimals), "Value did not equal 500 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -185,7 +185,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 100 * Math.pow(10, decimals), "Value did not equal 100 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -196,7 +196,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 0 * Math.pow(10, decimals), "Value did not equal 0 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -207,7 +207,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 1000 * Math.pow(10, decimals), "Value did not equal 1000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -218,7 +218,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 1000 * Math.pow(10, decimals), "Value did not equal 1000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -229,7 +229,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 250 * Math.pow(10, decimals), "Value did not equal 250 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -240,7 +240,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 1000 * Math.pow(10, decimals), "Value did not equal 1000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -251,7 +251,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 0 * Math.pow(10, decimals), "Value did not equal 0 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -262,7 +262,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 500 * Math.pow(10, decimals), "Value did not equal 500 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -273,7 +273,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 250 * Math.pow(10, decimals), "Value did not equal 250 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -284,7 +284,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 50 * Math.pow(10, decimals), "Value did not equal 50 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -295,7 +295,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 1000 * Math.pow(10, decimals), "Value did not equal 1000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -306,7 +306,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 10000 * Math.pow(10, decimals), "Value did not equal 10000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -317,7 +317,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 250 * Math.pow(10, decimals), "Value did not equal 250 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -328,7 +328,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 250 * Math.pow(10, decimals), "Value did not equal 250 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -339,7 +339,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 2500 * Math.pow(10, decimals), "Value did not equal 2500 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -350,7 +350,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 1000 * Math.pow(10, decimals), "Value did not equal 1000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -361,7 +361,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 2500 * Math.pow(10, decimals), "Value did not equal 2500 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -372,7 +372,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 5000 * Math.pow(10, decimals), "Value did not equal 5000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -383,7 +383,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 200 * Math.pow(10, decimals), "Value did not equal 200 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -394,7 +394,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 2000 * Math.pow(10, decimals), "Value did not equal 2000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -405,7 +405,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 2000 * Math.pow(10, decimals), "Value did not equal 2000 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
@@ -416,7 +416,7 @@ contract('GitToken', function(accounts) {
         assert.equal(values[0].toNumber(), 100 * Math.pow(10, decimals), "Value did not equal 100 * Math.pow(10, decimals)");
         assert.equal(values[1].toNumber(), 0, "Value did not equal 0");
       }).catch(function(error) {
-        assert.equal(error, null, error.toString())
+        assert.equal(error, null, error.message)
       });
     });
 
