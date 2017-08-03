@@ -1,15 +1,15 @@
 {
   "contract_name": "GitTokenLib",
   "abi": [],
-  "unlinked_binary": "0x60606040523415600b57fe5b5b60338060196000396000f30060606040525bfe00a165627a7a723058202df3ef3ba9a5a447c6882c57aefe7b69eda9b2a80f4a8f12540a4a3100c332040029",
+  "unlinked_binary": "0x60606040523415600b57fe5b5b60338060196000396000f30060606040525bfe00a165627a7a72305820f4b13296df653a367cbcc72cfca0549cb908bb3a8e9b299dd7f62d832d9d49a10029",
   "networks": {
     "17": {
       "events": {},
       "links": {},
-      "address": "0xbc12f9915f3a5be7fd598adeab832e36c2320d0f",
-      "updated_at": 1501782477809
+      "address": "0x957b9c0d299abbb2cf38661155ba90c88c15df61",
+      "updated_at": 1501782990044
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1501782477809
+  "updated_at": 1501782990044
 }
