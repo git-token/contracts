@@ -100,7 +100,6 @@ contract GitToken is Ownable {
    * @dev Returns the current total supply of tokens issued
    * @return _supply uint Supply of tokens currently issued
    * NOTE: Remember to adjust supply for decimals representation (e.g. supply / 10 ** decimals)
-   * NOTE: ERC20 standard method
    */
   function totalSupply() constant returns (uint _supply) {
     return gittoken.totalSupply;
@@ -142,7 +141,7 @@ contract GitToken is Ownable {
   }
 
   /**
-   * @dev Returns the balance of tokens associated with the address provided
+   * @dev ERC20 `balanceOf` Method | Returns the balance of tokens associated with the address provided
    * @param  _holder      address Ethereum address to find token balance for
    * @return _balance     uint    Value of tokens held by ethereum address
    */
@@ -151,7 +150,7 @@ contract GitToken is Ownable {
   }
 
   /**
-   * @dev ERC20 Transfer Method | Transfer tokens to account from sender account
+   * @dev ERC20 `transfer` Method | Transfer tokens to account from sender account
    * @param  _to      address Ethereum address to transfer tokens to,
    * @param  _value   uint    Number of tokens to transfer,
    * @return          bool    Returns boolean value if method is called
@@ -165,18 +164,33 @@ contract GitToken is Ownable {
     }
   }
 
-  function transferFrom(address _from, address _to, uint _value) public onlyPayloadSize(3 * 32) {
+  /**
+   * @dev ERC20 `transferFrom` Method | Allow approved spender (msg.sender) to transfer tokens from one account to another
+   * @param  _from  address Ethereum address to move tokens from,
+   * @param  _to    address Ethereum address to move tokens to,
+   * @param  _value uint    Number of tokens to move between accounts,
+   * @return        bool    Retrusn boolean value if method is called
+   */
+  function transferFrom(address _from, address _to, uint _value) public onlyPayloadSize(3 * 32) returns (bool) {
     if(!gittoken._transferFrom(_from, _to, _value)) {
       throw;
     } else {
       Transfer(_from, _to, _value);
+      return true;
     }
   }
 
-  function approve(address _spender, uint _value) public onlyPayloadSize(2 * 32) {
-    // Explicitly check if the approved address already has an allowance,
-    // Ensure the approver must reset the approved value to 0 before changing to the desired amount.
-    // see: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+  /**
+   * @dev ERC20 `approve` Method | Approve spender to transfer an amount of
+   * tokens on behalf of another account
+   * @param  _spender address Ethereum address of spender to approve,
+   * @param  _value   uint    Number of tokens to approve spender to transfer,
+   * @return          bool    Returns boolean value is method is called;
+   * NOTE: Explicitly check if the approved address already has an allowance,
+   * Ensure the approver must reset the approved value to 0 before changing to the desired amount.
+   * see: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+   */
+  function approve(address _spender, uint _value) public onlyPayloadSize(2 * 32) returns (bool){
     if(_value > 0 && gittoken.allowed[msg.sender][_spender] > 0) {
       throw;
     } else {
@@ -185,7 +199,14 @@ contract GitToken is Ownable {
     }
   }
 
-  function allowance(address _owner, address _spender) constant returns (uint) {
+  /**
+   * ERC20 `allowance` Method | Check the spender allowance for a token owner
+   * @param  _owner     address Ethereum address of token owner,
+   * @param  _spender   address Ethereum address of spender,
+   * @return _allowance uint    Number of tokens allowed by the owner to be
+   * moved by the spender
+   */
+  function allowance(address _owner, address _spender) constant returns (uint _allowance) {
     return gittoken.allowed[_owner][_spender];
   }
 
