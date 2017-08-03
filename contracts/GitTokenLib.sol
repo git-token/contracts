@@ -70,7 +70,13 @@ library GitTokenLib {
     mapping(string => bool) receivedDelivery;
   }
 
-  /**/
+  /**
+   * @dev Internal transfer method for GitToken ERC20 transfer method
+   * @param  self   Data    Use the Data struct as the contract storage and reference
+   * @param   _to   address Ethereum address of account to transfer tokens to
+   * @param  _value uint    Amount of tokens to transfer
+   * @return        bool    Returns boolean value when called from the parent contract;
+   */
   function _transfer(
     Data storage self,
     address _to,
@@ -81,7 +87,14 @@ library GitTokenLib {
     return true;
   }
 
-  /**/
+  /**
+   * @dev Internal transferFrom method for GitToken ERC20 transfer method
+   * @param  self   Data    Use the Data struct as the contract storage and reference
+   * @param  _from  address Ethereum address to move tokens from,
+   * @param  _to    address Ethereum address to move tokens to,
+   * @param  _value uint    Number of tokens to move between accounts,
+   * @return        bool    Returns boolean value when called from the parent contract;
+   */
   function _transferFrom(
     Data storage self,
     address _from,
@@ -100,6 +113,16 @@ library GitTokenLib {
     return true;
   }
 
+  /**
+   * @dev Internal rewardContributor method for GitToken contract rewardContributor method
+   * @param  self   Data    Use the Data struct as the contract storage and reference
+   * @param  _username     string GitHub username of contributor
+   * @param  _rewardType   string GitHub web hook event
+   * @param  _reservedType string GitHub web hook event subtype (action; e.g. `organization` -> `member_added`)
+   * @param  _rewardBonus  uint   Number of tokens to send to contributor as a bonus (used for off-chain calculated values)
+   * @param  _deliveryID   string GitHub delivery ID of web hook request
+   * @return               bool   Returns boolean value when called from the parent contract;
+   */
   function _rewardContributor (
     Data storage self,
     string _username,
@@ -108,34 +131,58 @@ library GitTokenLib {
     uint _rewardBonus,
     string _deliveryID
   ) internal returns (bool) {
+    // Calculate total reward value for contribution event
     uint _value = self.rewardValues[_rewardType].add(_rewardBonus);
+
+    // Calculate reserved value for contribution event
     uint _reservedValue = self.reservedValues[_rewardType][_reservedType];
+
+    // Get the contributor Ethereum address from GitHub username
     address _contributor = self.contributorAddresses[_username];
 
-    if(_value == 0) {
+    // If no value is created, then throw the transaction;
+    if(_value == 0 && _reservedValue == 0) {
       throw;
+      // If the GitHub web hook event ID has already occured, then throw the transaction;
     } else if (self.receivedDelivery[_deliveryID] == true) {
       throw;
     } else {
+      // Update totalSupply with the added values created, including the reserved supply for auction;
       self.totalSupply = self.totalSupply.add(_value).add(_reservedValue);
+
+      // Add to the balance of reserved tokens held for auction by the contract
       self.balances[address(this)] = self.balances[address(this)].add(_reservedValue);
 
+      // If the contributor is not yet verified, increase the unclaimed rewards for the user until the user verifies herself/himself;
       if (_contributor == 0x0){
         self.unclaimedRewards[_username] = self.unclaimedRewards[_username].add(_value);
       } else {
+        // If the contributor's address is set, update the contributor's balance;
         self.balances[_contributor] = self.balances[_contributor].add(_value);
       }
 
+      // Finally, set the received deliveries for this event to true to prevent/mitigate event replay attacks;
       self.receivedDelivery[_deliveryID] = true;
+
+      // Return true to parent contract
       return true;
     }
   }
 
+  /**
+   * @dev Internal method for GitToken contract verifyContributor method
+   * @param  self         Data    Use the Data struct as the contract storage and reference
+   * @param  _contributor address Ethereum address of GitHub organization contributor,
+   * @param  _username    string  GitHub username of contributor,
+   * @return              bool    Returns boolean value when called from the parent contract;
+   */
   function _verifyContributor(
     Data storage self,
     address _contributor,
     string _username
   ) internal returns (bool) {
+
+    // If the contributor address does not exist, then throw the transaction
     if (_contributor == 0x0) {
       throw;
     }
@@ -168,8 +215,16 @@ library GitTokenLib {
   }
 
 
+  /**
+   * @dev Initialize reserved type mapped to reserved value
+   * @param  self      Data    Use the Data struct as the contract storage and reference
+   * @param  _decimals uint    Decimal places to represent token values in
+   * @return           bool    Returns boolean value when called from the parent contract
+   */
   function _initReservedValues(Data storage self, uint _decimals) internal returns (bool) {
-    self.reservedValues['milestone']['created']  = 15000 * 10**_decimals;
+
+    /* NOTE: change to when the milestone is reached */
+    self.reservedValues['milestone']['created'] = 0;
 
     // Anytime a new member is invited to an organization
     self.reservedValues['organization']['member_invited']  = 0;
@@ -178,6 +233,12 @@ library GitTokenLib {
     return true;
   }
 
+  /**
+   * @dev Initialize reward type (GitHub web hook event) mapped to reward value
+   * @param  self      Data    Use the Data struct as the contract storage and reference
+   * @param  _decimals uint    Decimal places to represent token values in
+   * @return           bool    Returns boolean value when called from the parent contract
+   */
   function _initRewardValues(Data storage self, uint _decimals) internal returns (bool) {
     // Set default rewardValues -- Note, these values are not solidified and are untested as to their effectiveness of incentivization;
     // These values are customizable using setRewardValue(uint256 value, string type)
