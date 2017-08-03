@@ -1,11 +1,59 @@
+/**
+ Copyright 2017 GitToken
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy of
+ this software and associated documentation files (the "Software"), to deal in
+ the Software without restriction, including without limitation the rights to use,
+ copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
+ Software, and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 pragma solidity ^0.4.11;
 
 import './SafeMath.sol';
-
+/**
+ * @title GitTokenLib Library for implementing GitToken contract methods
+ * @author Ryan Michael Tate
+ */
 library GitTokenLib {
 
   using SafeMath for uint;
 
+  /**
+   * @dev Data Solidity struct for data storage reference
+   * @notice totalSupply    uint   Total supply of tokens issued;
+   * @notice decimals       uint   Decimal representation of token values;
+   * @notice name           string Name of token;
+   * @notice organization   string GitHub organization name;
+   * @notice symbol         string Symbol of token;
+   * @notice rewardValues   mapping(string => uint256) Mapping of GitHub web hook
+   * events to reward values;
+   * @notice reservedValues mapping(string => mapping(string => uint256)) Double
+   * mapping of GitHub web hook events and subtypes to reward values;
+   * @notice contributorUsernames mapping(address => string) Mapping of Ethereum
+   * addresses to GitHub usernames;
+   * @notice contributorAddresses mapping(string => address) Mapping of GitHub
+   * usernames to Ethereum addresses;
+   * @notice allowed mapping(address => mapping(address => uint)) Double mapping
+   *of Ethereum address to address of spender of an uint amount of tokens;
+   * @notice balances mapping(address => uint) Mapping of Ethereum address to an
+   * amount of tokens held;
+   * @notice unclaimedRewards mapping(string => uint) Mapping of GitHub usernames
+   * unclaimed (pre-verified) amount of tokens;
+   * @notice receivedDelivery mapping(string => bool) Mapping of GitHub delivery
+   * web hook IDs to boolean values; used to prevent/mitigate replay attack risk;
+   */
   struct Data {
     uint totalSupply;
     uint decimals;
@@ -19,7 +67,6 @@ library GitTokenLib {
     mapping(address => mapping(address => uint)) allowed;
     mapping(address => uint) balances;
     mapping(string => uint) unclaimedRewards;
-    mapping(string => bytes32) usernameVerification;
     mapping(string => bool) receivedDelivery;
   }
 
@@ -98,39 +145,36 @@ library GitTokenLib {
       // Add to existing balance in case contributor has multiple usernames
       self.balances[_contributor] = self.balances[_contributor].add(self.unclaimedRewards[_username]);
       self.unclaimedRewards[_username] = 0;
+    } else if (
+      self.contributorAddresses[_username] != _contributor &&
+      self.balances[self.contributorAddresses[_username]] > 0
+    ) {
+      // Update the contributor address for the user
+      self.contributorUsernames[_contributor] = _username;
+      self.contributorAddresses[_username] = _contributor;
+
+      // if the user switches his/her registered account to another account,
+      // the balance of the prior account should be moved to the new account
+      self.balances[_contributor] = self.balances[self.contributorAddresses[_username]];
+
+      // Set the balance of the prior account to 0 after moving the balance;
+      self.balances[self.contributorAddresses[_username]] = 0;
+    } else {
+      // establish username and address with contract;
+      self.contributorUsernames[_contributor] = _username;
+      self.contributorAddresses[_username] = _contributor;
     }
-    self.contributorUsernames[_contributor] = _username;
-    self.contributorAddresses[_username] = _contributor;
     return true;
   }
 
-
-  function _setContributor(
-    Data storage self,
-    string _username,
-    bytes _code
-  ) internal returns (bool) {
-    if (self.usernameVerification[_username] != keccak256(_code)) {
-      throw;
-    }
-
-    if (self.unclaimedRewards[_username] > 0) {
-      // Transfer all previously unclaimed rewards of an username to an address;
-      // Add to existing balance in case contributor has multiple usernames
-      self.balances[msg.sender] = self.balances[msg.sender].add(self.unclaimedRewards[_username]);
-      self.unclaimedRewards[_username] = 0;
-    }
-    self.contributorUsernames[msg.sender] = _username;
-    self.contributorAddresses[_username] = msg.sender;
-    return true;
-  }
 
   function _initReservedValues(Data storage self, uint _decimals) internal returns (bool) {
-
     self.reservedValues['milestone']['created']  = 15000 * 10**_decimals;
 
+    // Anytime a new member is invited to an organization
+    self.reservedValues['organization']['member_invited']  = 0;
+    // Anytime a new member is added to an organization
     self.reservedValues['organization']['member_added']  = 15000 * 10**_decimals;
-
     return true;
   }
 
