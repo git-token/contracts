@@ -16,15 +16,48 @@ contract GitToken is Ownable {
   GitTokenLib.Data gittoken;
 
   /**
-   * Approval Event
+   * ERC20 Approval Event | Emitted when a spender is approved by an owner
    * @param owner   address Ethereum address of owner of tokens,
    * @param spender address Ethereum address of approved spender of tokens,
-   * @param value   uint Number of tokens to approve spender for;
+   * @param value   uint    Number of tokens to approve spender for;
    */
   event Approval(address indexed owner, address indexed spender, uint value);
+
+  /**
+   * ERC20 Transfer Event | Emitted when a transfer is made between accounts
+   * @param from  address Ethereum address of tokens sent from,
+   * @param to    address Ethereum address of tokens sent to,
+   * @param value uint    Number of tokens to transfer;
+   */
   event Transfer(address indexed from, address indexed to, uint value);
+
+  /**
+   * Contribution Event | Emitted when a GitHub contribution is broadcasted by web hook,
+   * @param contributor   address Ethereum address of contributor,
+   * @param username      string  GitHub username of contributor,
+   * @param value         uint    Number of tokens created and distributed to contributor,
+   * @param reservedValue uint    Number of tokens created and reserved for auction,
+   * @param date          uint    Unix timestamp of when the contributor was rewarded,
+   * @param rewardType    string  GitHub web hook event type (e.g. push, pull_request)
+   */
   event Contribution(address indexed contributor, string username, uint value, uint reservedValue, uint date, string rewardType);
+
+  /**
+   * ContributionVerified Event | Emitted when a user verifies themselves on the UI using GitHub OAuth
+   * @param contributor address Ethereum address of verified contributor,
+   * @param username    string  GitHub username associated with contributor Ethereum address,
+   * @param date        uint    Unix timestamp when user was verified;
+   */
   event ContributorVerified(address indexed contributor, string username, uint date);
+
+  /**
+   * RewardValueSet Event | Emitted when the reward and reserved type values are changed
+   * @param rewardType   string GitHub web hook event type,
+   * @param reservedType string GitHub web hook action type (a subtype of rewardType; e.g. organization -> member_added),
+   * @param value        uint   Updated value of reward or reserved Type
+   * @param date         uint   Unix timestamp when reward values are reset
+   * NOTE: This may event is used by `setRewardValue()` and `setReservedValue()` methods
+   */
   event RewardValueSet(string rewardType, string reservedType, uint value, uint date);
 
   /**
