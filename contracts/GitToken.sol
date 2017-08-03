@@ -53,7 +53,7 @@ contract GitToken is Ownable {
   /**
    * RewardValueSet Event | Emitted when the reward and reserved type values are changed
    * @param rewardType   string GitHub web hook event type,
-   * @param reservedType string GitHub web hook action type (a subtype of rewardType; e.g. organization -> member_added),
+   * @param reservedType string GitHub web hook action type (a subtype of rewardType; e.g. `organization` -> `member_added`),
    * @param value        uint   Updated value of reward or reserved Type
    * @param date         uint   Unix timestamp when reward values are reset
    * NOTE: This event is used by `setRewardValue()` and `setReservedValue()` methods
@@ -258,14 +258,15 @@ contract GitToken is Ownable {
     }
   }
 
-  function setContributor(string _username, bytes _code) public returns (bool) {
-    if (!gittoken._setContributor(_username, _code)) {
-      throw;
-    } else {
-      return true;
-    }
-  }
-
+  /**
+   * @dev Reward contributor when a GitHub web hook event is received
+   * @param  _username     string GitHub username of contributor
+   * @param  _rewardType   string GitHub web hook event
+   * @param  _reservedType string GitHub web hook event subtype (action; e.g. `organization` -> `member_added`)
+   * @param  _rewardBonus  uint   Number of tokens to send to contributor as a bonus (used for off-chain calculated values)
+   * @param  _deliveryID   string GitHub delivery ID of web hook request
+   * @return               bool   Returns boolean value if method is called
+   */
   function rewardContributor(
     string _username,
     string _rewardType,
@@ -286,22 +287,40 @@ contract GitToken is Ownable {
 
 
   /**
-   * GitToken Getter Functions
+   * @dev Get the value associated with a GitHub web hook event
+   * @param  _rewardType  string  GitHub web hook event,
+   * @return _rewardValue uint256, _reservedType uint256 Reward value associated
+   * with GitHub web hook event and subtype (action);
    */
-
-  function getRewardDetails(string _rewardType) constant returns (uint256) {
-    return gittoken.rewardValues[_rewardType];
+  function getRewardDetails(string _rewardType, string _reservedType) constant returns (uint256 _rewardValue, uint256 _reservedValue) {
+    return (gittoken.rewardValues[_rewardType], gittoken.reservedValues[_rewardType][_reservedType]);
   }
 
-  function getContributorAddress(string _username) constant returns (address) {
+  /**
+   * @dev Get Ethereum address associated with contributor's GitHub username
+   * @param  _username            string GitHub username of the contributor,
+   * @return _contributorAddress  address Ethereum address of the contributor associated
+   * passed in GitHub username;
+   */
+  function getContributorAddress(string _username) constant returns (address _contributorAddress) {
     return gittoken.contributorAddresses[_username];
   }
 
-  function getContributorUsername(address _contributorAddress) constant returns (string) {
+  /**
+   * @dev Get GitHub username from contributor's Ethereum address
+   * @param  _contributorAddress address Ethereum address of contributor,
+   * @return _username           string  GitHub username associated with contributor address;
+   */
+  function getContributorUsername(address _contributorAddress) constant returns (string _username) {
     return gittoken.contributorUsernames[_contributorAddress];
   }
 
-  function getUnclaimedRewards(string _username) constant returns (uint) {
+  /**
+   * @dev Get unclaimed (pre-verified) rewards associated with GitHub username
+   * @param  _username string GitHub username of contributor,
+   * @return _value    uint   Number of tokens issued to GitHub username
+   */
+  function getUnclaimedRewards(string _username) constant returns (uint _value) {
     return gittoken.unclaimedRewards[_username];
   }
 
