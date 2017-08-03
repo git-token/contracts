@@ -200,7 +200,7 @@ contract GitToken is Ownable {
   }
 
   /**
-   * ERC20 `allowance` Method | Check the spender allowance for a token owner
+   * @dev ERC20 `allowance` Method | Check the spender allowance for a token owner
    * @param  _owner     address Ethereum address of token owner,
    * @param  _spender   address Ethereum address of spender,
    * @return _allowance uint    Number of tokens allowed by the owner to be
@@ -212,7 +212,10 @@ contract GitToken is Ownable {
 
 
   /**
-   * GitToken Setter (State Changing) Functions
+   * @dev Set the reward value for a GitHub web hook event
+   * @param _rewardValue uint256 Number of tokens to issue given a rewardType,
+   * @param _rewardType  string  GitHub web hook event,
+   * @return             bool    Returns boolean value if method is called;
    */
   function setRewardValue(
     uint256 _rewardValue,
@@ -223,6 +226,13 @@ contract GitToken is Ownable {
     return true;
   }
 
+  /**
+   * @dev Set the reserved value for a GitHub web hook event subtype
+   * @param _reservedValue uint256 Number of tokens to issue given a reservedType,
+   * @param _rewardType    string  GitHub web hook event,
+   * @param _reservedType  string  GitHub web hook event subtype (action; e.g. `organization` -> `member_added`),
+   * @return               bool    Returns boolean value if method is called;
+   */
   function setReservedValue(
     uint256 _reservedValue,
     string _rewardType,
@@ -233,16 +243,19 @@ contract GitToken is Ownable {
     return true;
   }
 
+  /**
+   * @dev Verify contributor Ethereum address associated with GitHub username
+   * @param  _contributor address Ethereum address of GitHub organization contributor,
+   * @param  _username    string  GitHub username of contributor,
+   * @return              bool    Returns boolean value if method is called;
+   */
   function verifyContributor(address _contributor, string _username) onlyOwner public returns (bool) {
-    /*gittoken.usernameVerification[_username] = keccak256(_code);
-    return true;*/
     if(!gittoken._verifyContributor(_contributor, _username)) {
       throw;
     } else {
       ContributorVerified(_contributor, _username, now);
       return true;
     }
-
   }
 
   function setContributor(string _username, bytes _code) public returns (bool) {
