@@ -104,7 +104,7 @@ contract GitToken is Ownable {
       throw;
     } else {
 
-      if (_contributor != 0x0) { 
+      if (_contributor != 0x0) {
         owner[_contributor] = true;
       }
 
@@ -145,7 +145,7 @@ contract GitToken is Ownable {
    * NOTE: This value is used to make GitHub API calls; it must be associated with
    * the GitHub organization the web hook has been configured for.
    */
-  function organization() constant returns (string _organization) {
+  function organization() public returns (string _organization) {
     return gittoken.organization;
   }
 
@@ -153,7 +153,7 @@ contract GitToken is Ownable {
    * @dev Returns the string of the token contract name
    * @return _name string Name of the token contract
    */
-  function name() constant returns (string _name) {
+  function name() public returns (string _name) {
     return gittoken.name;
   }
 
@@ -161,7 +161,7 @@ contract GitToken is Ownable {
    * @dev Returns the string of the token contract symbol
    * @return _symbol string Symbol of the token contract
    */
-  function symbol() constant returns (string _symbol) {
+  function symbol() public returns (string _symbol) {
     return gittoken.symbol;
   }
 
