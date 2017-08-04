@@ -98,7 +98,20 @@ contract GitToken is Ownable {
     string _symbol,
     uint _decimals
   ) {
-    if(!gittoken._initRewardValues(_decimals)) {
+    if (_contributor != 0x0) {
+      owner[_contributor] = true;
+    }
+
+    gittoken.totalSupply = 0;
+    gittoken.name = _name;
+    gittoken.organization = _organization;
+    gittoken.symbol = _symbol;
+    gittoken.decimals = _decimals;
+    // Set initial contributor username & address
+    gittoken.contributorUsernames[msg.sender] = _username;
+    gittoken.contributorUsernames[_contributor] = _username;
+    gittoken.contributorAddresses[_username] = _contributor;
+    /*if(!gittoken._initRewardValues(_decimals)) {
       throw;
     } else if(!gittoken._initReservedValues(_decimals)) {
       throw;
@@ -117,7 +130,7 @@ contract GitToken is Ownable {
       gittoken.contributorUsernames[msg.sender] = _username;
       gittoken.contributorUsernames[_contributor] = _username;
       gittoken.contributorAddresses[_username] = _contributor;
-    }
+    }*/
 
   }
 
