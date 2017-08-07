@@ -30,6 +30,14 @@ library GitTokenLib {
 
   using SafeMath for uint;
 
+  struct Auction {
+    uint round;
+    uint startDate;
+    uint endDate;
+    uint tokensOffered;
+    uint auctionPrice;
+  }
+
   /**
    * @dev Data Solidity struct for data storage reference
    * @notice totalSupply    uint   Total supply of tokens issued;
@@ -60,6 +68,9 @@ library GitTokenLib {
     string name;
     string organization;
     string symbol;
+    uint auctionRound;
+    uint lockTokenTransfersUntil;
+    mapping(uint => Auction) auctionDetails;
     mapping(string => uint256) rewardValues;
     mapping(string => mapping(string => uint256)) reservedValues;
     mapping(address => string) contributorUsernames;
@@ -70,6 +81,7 @@ library GitTokenLib {
     mapping(string => bool) receivedDelivery;
   }
 
+
   /**
    * @dev Internal transfer method for GitToken ERC20 transfer method
    * @param  self   Data    Use the Data struct as the contract storage and reference
@@ -77,11 +89,7 @@ library GitTokenLib {
    * @param  _value uint    Amount of tokens to transfer
    * @return        bool    Returns boolean value when called from the parent contract;
    */
-  function _transfer(
-    Data storage self,
-    address _to,
-    uint _value
-  ) internal returns (bool) {
+  function _transfer(Data storage self, address _to, uint _value) internal returns (bool) {
     self.balances[msg.sender] = self.balances[msg.sender].sub(_value);
     self.balances[_to] = self.balances[_to].add(_value);
     return true;
@@ -141,10 +149,10 @@ library GitTokenLib {
     address _contributor = self.contributorAddresses[_username];
 
     // If no value is created, then throw the transaction;
-    if(_value == 0 && _reservedValue == 0) {
+    if(_value == 0 && _reservedValue == 0){
       throw;
       // If the GitHub web hook event ID has already occured, then throw the transaction;
-    } else if (self.receivedDelivery[_deliveryID] == true) {
+    } else if(self.receivedDelivery[_deliveryID] == true) {
       throw;
     } else {
       // Update totalSupply with the added values created, including the reserved supply for auction;
@@ -161,7 +169,7 @@ library GitTokenLib {
         self.balances[_contributor] = self.balances[_contributor].add(_value);
       }
 
-      // Finally, set the received deliveries for this event to true to prevent/mitigate event replay attacks;
+      // Set the received deliveries for this event to true to prevent/mitigate event replay attacks;
       self.receivedDelivery[_deliveryID] = true;
 
       // Return true to parent contract
@@ -183,9 +191,7 @@ library GitTokenLib {
   ) internal returns (bool) {
 
     // If the contributor address does not exist, then throw the transaction
-    if (_contributor == 0x0) {
-      throw;
-    }
+    require(_contributor != 0x0);
 
     if (self.unclaimedRewards[_username] > 0) {
       // Transfer all previously unclaimed rewards of an username to an address;
@@ -214,136 +220,31 @@ library GitTokenLib {
     return true;
   }
 
+  function _initializeAuction(
+    Data storage self,
+    uint _auctionPrice,
+    uint _delay,
+    bool _lockTokens
+  ) internal returns(bool) {
+    // Ensure the contract has enough tokens to move to auction;
+    require(self.balances[address(this)] != 0);
+    self.auctionRound += 1;
 
-  /**
-   * @dev Initialize reserved type mapped to reserved value
-   * @param  self      Data    Use the Data struct as the contract storage and reference
-   * @param  _decimals uint    Decimal places to represent token values in
-   * @return           bool    Returns boolean value when called from the parent contract
-   */
-  function _initReservedValues(Data storage self, uint _decimals) internal returns (bool) {
+    uint delay     = _delay > 60*60*24 ? _delay : 60*60*24*3;
+    uint startDate = now.add(delay);
+    uint endDate   = startDate.add(delay);
 
-    /* NOTE: change to when the milestone is reached */
-    self.reservedValues['milestone']['created'] = 0;
+    self.auctionDetails[self.auctionRound] = Auction(
+      self.auctionRound,
+      startDate,
+      endDate,
+      self.balances[address(this)],
+      _auctionPrice * (10 ** 18 / 10 ** self.decimals)
+    );
 
-    // Anytime a new member is invited to an organization
-    self.reservedValues['organization']['member_invited'] = 0;
-    // Anytime a new member is added to an organization
-    self.reservedValues['organization']['member_added'] = 15000 * 10**_decimals;
-    return true;
-  }
-
-  /**
-   * @dev Initialize reward type (GitHub web hook event) mapped to reward value
-   * @param  self      Data    Use the Data struct as the contract storage and reference
-   * @param  _decimals uint    Decimal places to represent token values in
-   * @return           bool    Returns boolean value when called from the parent contract
-   */
-  function _initRewardValues(Data storage self, uint _decimals) internal returns (bool) {
-    // Set default rewardValues -- Note, these values are not solidified and are untested as to their effectiveness of incentivization;
-    // These values are customizable using setRewardValue(uint256 value, string type)
-
-    // Use when setting up the webhook for github
-    self.rewardValues['ping']                        = 2500 * 10**_decimals;
-
-    // Any time a Commit is commented on.
-    self.rewardValues['commit_comment']              = 250 * 10**_decimals;
-
-     // Any time a Branch or Tag is created.
-    self.rewardValues['create']                      = 2500 * 10**_decimals;
-
-    // Any time a Branch or Tag is deleted.
-    self.rewardValues['delete']                      = 0 * 10**_decimals;
-
-     // Any time a Repository has a new deployment created from the API.
-    self.rewardValues['deployment']                  = 5000 * 10**_decimals;
-
-    // Any time a deployment for a Repository has a status update
-    self.rewardValues['deployment_status']           = 100 * 10**_decimals;
-
-    // Any time a Repository is forked.
-    self.rewardValues['fork']                        = 5000 * 10**_decimals;
-
-     // Any time a Wiki page is updated.
-    self.rewardValues['gollum']                      = 100 * 10**_decimals;
-
-    // Any time a GitHub App is installed or uninstalled.
-    self.rewardValues['installation']                = 250 * 10**_decimals;
-
-    // Any time a repository is added or removed from an organization (? check this)
-    self.rewardValues['installation_repositories']   = 1000 * 10**_decimals;
-
-     // Any time a comment on an issue is created, edited, or deleted.
-    self.rewardValues['issue_comment']               = 250 * 10**_decimals;
-
-    // Any time an Issue is assigned, unassigned, labeled, unlabeled, opened, edited,
-    self.rewardValues['issues']                      = 500 * 10**_decimals;
-
-    // Any time a Label is created, edited, or deleted.
-    self.rewardValues['label']                       = 100 * 10**_decimals;
-
-    // Any time a user purchases, cancels, or changes their GitHub
-    self.rewardValues['marketplace_purchases']       = 0 * 10**_decimals;
-
-    // Any time a User is added or removed as a collaborator to a Repository, or has
-    self.rewardValues['member']                      = 1000 * 10**_decimals;
-
-    // Any time a User is added or removed from a team. Organization hooks only.
-    self.rewardValues['membership']                  = 1000 * 10**_decimals;
-
-    // Any time a Milestone is created, closed, opened, edited, or deleted.
-    self.rewardValues['milestone']                   = 250 * 10**_decimals;
-
-    // Any time a user is added, removed, or invited to an Organization.
-    self.rewardValues['organization']                = 1000 * 10**_decimals;
-
-    // Any time an organization blocks or unblocks a user. Organization hooks only.
-    self.rewardValues['org_block']                    = 0 * 10**_decimals;
-
-     // Any time a Pages site is built or results in a failed build.
-    self.rewardValues['page_build']                   = 500 * 10**_decimals;
-
-    // Any time a Project Card is created, edited, moved, converted to an issue,
-    self.rewardValues['project_card']                 = 250 * 10**_decimals;
-
-    // Any time a Project Column is created, edited, moved, or deleted.
-    self.rewardValues['project_column']               = 50 * 10**_decimals;
-
-    // Any time a Project is created, edited, closed, reopened, or deleted.
-    self.rewardValues['project']                     = 1000 * 10**_decimals;
-
-    // Any time a Repository changes from private to public.
-    self.rewardValues['public']                      = 10000 * 10**_decimals;
-
-    // Any time a comment on a pull request's unified diff is created, edited, or deleted (in the Files Changed tab).
-    self.rewardValues['pull_request_review_comment'] = 250 * 10**_decimals;
-
-    // Any time a pull request review is submitted, edited, or dismissed.
-    self.rewardValues['pull_request_review']         = 250 * 10**_decimals;
-
-    // Any time a pull request is assigned, unassigned, labeled, unlabeled, opened, edited, closed, reopened, or synchronized (updated due to a new push in the branch that the pull request is tracking). Also any time a pull request review is requested, or a review request is removed.
-    self.rewardValues['pull_request']                = 2500 * 10**_decimals;
-
-    // Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted. This is the default event.
-    self.rewardValues['push']                        = 1000 * 10**_decimals;
-
-    // Any time a Repository is created, deleted (organization hooks only), made public, or made private.
-    self.rewardValues['repository']                  = 2500 * 10**_decimals;
-
-    // Any time a Release is published in a Repository.
-    self.rewardValues['release']                     = 5000 * 10**_decimals;
-
-    // Any time a Repository has a status update from the API
-    self.rewardValues['status']                      = 200 * 10**_decimals;
-
-    // Any time a team is created, deleted, modified, or added to or removed from a repository. Organization hooks only
-    self.rewardValues['team']                        = 2000 * 10**_decimals;
-
-    // Any time a team is added or modified on a Repository.
-    self.rewardValues['team_add']                    = 2000 * 10**_decimals;
-
-    // Any time a User stars a Repository.
-    self.rewardValues['watch']                       = 100 * 10**_decimals;
+    _lockTokens == true ?
+      self.lockTokenTransfersUntil = endDate.add(delay) :
+      self.lockTokenTransfersUntil = 0;
 
     return true;
   }

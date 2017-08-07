@@ -82,6 +82,16 @@ contract GitToken is Ownable {
   event RewardValueSet(string rewardType, string reservedType, uint value, uint date);
 
   /**
+   * @dev
+   * @param startDate          uint Start date of the auction
+   * @param endDate            uint End date of the auction
+   * @param tokensOffered uint Token supply offered during the auction
+   * @param initialPrice       uint Initial price per token, denominated in ETH;
+   * default (10 ** 18 / 10 ** _decimals) * 5000 tokens / ETH
+   */
+  event NewAuction(uint auctionRound, uint startDate, uint endDate, uint tokensOffered, uint initialPrice);
+
+  /**
    * @dev Constructor method for GitToken Contract,
    * @param _contributor  address Ethereum Address of the primary contributor or organization owner,
    * @param _name         string  Name of the GitToken contract (name of organization),
@@ -107,89 +117,91 @@ contract GitToken is Ownable {
     gittoken.organization = _organization;
     gittoken.symbol = _symbol;
     gittoken.decimals = _decimals;
-    // Set initial contributor username & address
-    gittoken.contributorUsernames[msg.sender] = _username;
-    gittoken.contributorUsernames[_contributor] = _username;
-    gittoken.contributorAddresses[_username] = _contributor;
 
-    gittoken.reservedValues['milestone']['created'] = 0;
+    // Set initial contributor username & address
+    /*gittoken.contributorUsernames[_contributor] = _username;
+    gittoken.contributorAddresses[_username] = _contributor;*/
+
+    gittoken.reservedValues['milestone']['created']           = 0 * 10**_decimals;
+
     // Anytime a new member is invited to an organization
-    gittoken.reservedValues['organization']['member_invited'] = 0;
+    gittoken.reservedValues['organization']['member_invited'] = 0 * 10**_decimals;
     // Anytime a new member is added to an organization
-    gittoken.reservedValues['organization']['member_added'] = 15000 * 10**_decimals;
+    gittoken.reservedValues['organization']['member_added']   = 15000 * 10**_decimals;
     // Use when setting up the webhook for github
-    gittoken.rewardValues['ping']                        = 2500 * 10**_decimals;
+    gittoken.rewardValues['ping']                             = 2500 * 10**_decimals;
     // Any time a Commit is commented on.
-    gittoken.rewardValues['commit_comment']              = 250 * 10**_decimals;
+    gittoken.rewardValues['commit_comment']                   = 250 * 10**_decimals;
 
      // Any time a Branch or Tag is created.
-    gittoken.rewardValues['create']                      = 2500 * 10**_decimals;
+    gittoken.rewardValues['create']                           = 2500 * 10**_decimals;
     // Any time a Branch or Tag is deleted.
-    gittoken.rewardValues['delete']                      = 0 * 10**_decimals;
+    gittoken.rewardValues['delete']                           = 0 * 10**_decimals;
 
      // Any time a Repository has a new deployment created from the API.
-    gittoken.rewardValues['deployment']                  = 5000 * 10**_decimals;
+    gittoken.rewardValues['deployment']                       = 5000 * 10**_decimals;
     // Any time a deployment for a Repository has a status update
-    gittoken.rewardValues['deployment_status']           = 100 * 10**_decimals;
+    gittoken.rewardValues['deployment_status']                = 100 * 10**_decimals;
     // Any time a Repository is forked.
-    gittoken.rewardValues['fork']                        = 5000 * 10**_decimals;
+    gittoken.rewardValues['fork']                             = 5000 * 10**_decimals;
 
      // Any time a Wiki page is updated.
-    gittoken.rewardValues['gollum']                      = 100 * 10**_decimals;
+    gittoken.rewardValues['gollum']                           = 100 * 10**_decimals;
     // Any time a GitHub App is installed or uninstalled.
-    gittoken.rewardValues['installation']                = 250 * 10**_decimals;
+    gittoken.rewardValues['installation']                     = 250 * 10**_decimals;
     // Any time a repository is added or removed from an organization (? check this)
-    gittoken.rewardValues['installation_repositories']   = 1000 * 10**_decimals;
+    gittoken.rewardValues['installation_repositories']        = 1000 * 10**_decimals;
 
      // Any time a comment on an issue is created, edited, or deleted.
-    gittoken.rewardValues['issue_comment']               = 250 * 10**_decimals;
+    gittoken.rewardValues['issue_comment']                    = 250 * 10**_decimals;
     // Any time an Issue is assigned, unassigned, labeled, unlabeled, opened, edited,
-    gittoken.rewardValues['issues']                      = 500 * 10**_decimals;
+    gittoken.rewardValues['issues']                           = 500 * 10**_decimals;
     // Any time a Label is created, edited, or deleted.
-    gittoken.rewardValues['label']                       = 100 * 10**_decimals;
+    gittoken.rewardValues['label']                            = 100 * 10**_decimals;
     // Any time a user purchases, cancels, or changes their GitHub
-    gittoken.rewardValues['marketplace_purchases']       = 0 * 10**_decimals;
+    gittoken.rewardValues['marketplace_purchases']            = 0 * 10**_decimals;
     // Any time a User is added or removed as a collaborator to a Repository, or has
-    gittoken.rewardValues['member']                      = 1000 * 10**_decimals;
+    gittoken.rewardValues['member']                           = 1000 * 10**_decimals;
     // Any time a User is added or removed from a team. Organization hooks only.
-    gittoken.rewardValues['membership']                  = 1000 * 10**_decimals;
+    gittoken.rewardValues['membership']                       = 1000 * 10**_decimals;
     // Any time a Milestone is created, closed, opened, edited, or deleted.
-    gittoken.rewardValues['milestone']                   = 250 * 10**_decimals;
+    gittoken.rewardValues['milestone']                        = 250 * 10**_decimals;
     // Any time a user is added, removed, or invited to an Organization.
-    gittoken.rewardValues['organization']                = 1000 * 10**_decimals;
+    gittoken.rewardValues['organization']                     = 1000 * 10**_decimals;
     // Any time an organization blocks or unblocks a user. Organization hooks only.
-    gittoken.rewardValues['org_block']                    = 0 * 10**_decimals;
+    gittoken.rewardValues['org_block']                        = 0 * 10**_decimals;
 
      // Any time a Pages site is built or results in a failed build.
-    gittoken.rewardValues['page_build']                   = 500 * 10**_decimals;
+    gittoken.rewardValues['page_build']                       = 500 * 10**_decimals;
     // Any time a Project Card is created, edited, moved, converted to an issue,
-    gittoken.rewardValues['project_card']                 = 250 * 10**_decimals;
+    gittoken.rewardValues['project_card']                     = 250 * 10**_decimals;
     // Any time a Project Column is created, edited, moved, or deleted.
-    gittoken.rewardValues['project_column']               = 50 * 10**_decimals;
+    gittoken.rewardValues['project_column']                   = 50 * 10**_decimals;
     // Any time a Project is created, edited, closed, reopened, or deleted.
-    gittoken.rewardValues['project']                     = 1000 * 10**_decimals;
+    gittoken.rewardValues['project']                          = 1000 * 10**_decimals;
     // Any time a Repository changes from private to public.
-    gittoken.rewardValues['public']                      = 10000 * 10**_decimals;
+    gittoken.rewardValues['public']                           = 10000 * 10**_decimals;
     // Any time a comment on a pull request's unified diff is created, edited, or deleted (in the Files Changed tab).
-    gittoken.rewardValues['pull_request_review_comment'] = 250 * 10**_decimals;
+    gittoken.rewardValues['pull_request_review_comment']      = 250 * 10**_decimals;
     // Any time a pull request review is submitted, edited, or dismissed.
-    gittoken.rewardValues['pull_request_review']         = 250 * 10**_decimals;
+    gittoken.rewardValues['pull_request_review']              = 250 * 10**_decimals;
     // Any time a pull request is assigned, unassigned, labeled, unlabeled, opened, edited, closed, reopened, or synchronized (updated due to a new push in the branch that the pull request is tracking). Also any time a pull request review is requested, or a review request is removed.
-    gittoken.rewardValues['pull_request']                = 2500 * 10**_decimals;
+    gittoken.rewardValues['pull_request']                     = 2500 * 10**_decimals;
     // Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted. This is the default event.
-    gittoken.rewardValues['push']                        = 1000 * 10**_decimals;
+    gittoken.rewardValues['push']                             = 1000 * 10**_decimals;
     // Any time a Repository is created, deleted (organization hooks only), made public, or made private.
-    gittoken.rewardValues['repository']                  = 2500 * 10**_decimals;
+    gittoken.rewardValues['repository']                       = 2500 * 10**_decimals;
     // Any time a Release is published in a Repository.
-    gittoken.rewardValues['release']                     = 5000 * 10**_decimals;
+    gittoken.rewardValues['release']                          = 5000 * 10**_decimals;
     // Any time a Repository has a status update from the API
-    gittoken.rewardValues['status']                      = 200 * 10**_decimals;
+    gittoken.rewardValues['status']                           = 200 * 10**_decimals;
     // Any time a team is created, deleted, modified, or added to or removed from a repository. Organization hooks only
-    gittoken.rewardValues['team']                        = 2000 * 10**_decimals;
+    gittoken.rewardValues['team']                             = 2000 * 10**_decimals;
     // Any time a team is added or modified on a Repository.
-    gittoken.rewardValues['team_add']                    = 2000 * 10**_decimals;
+    gittoken.rewardValues['team_add']                         = 2000 * 10**_decimals;
     // Any time a User stars a Repository.
-    gittoken.rewardValues['watch']                       = 100 * 10**_decimals;
+    gittoken.rewardValues['watch']                            = 100 * 10**_decimals;
+
   }
 
   /**
@@ -251,13 +263,17 @@ contract GitToken is Ownable {
    * @param  _value   uint    Number of tokens to transfer,
    * @return          bool    Returns boolean value if method is called
    */
-  function transfer(address _to, uint _value) public onlyPayloadSize(2 * 32) returns (bool) {
-    if(!gittoken._transfer(_to, _value)) {
-      throw;
-    } else {
-      Transfer(msg.sender, _to, _value);
-      return true;
-    }
+  function transfer(
+    address _to,
+    uint _value
+  )
+    externalTokenTransfersLocked 
+    public
+    returns (bool)
+  {
+    require(gittoken._transfer(_to, _value));
+    Transfer(msg.sender, _to, _value);
+    return true;
   }
 
   /**
@@ -267,13 +283,19 @@ contract GitToken is Ownable {
    * @param  _value uint    Number of tokens to move between accounts,
    * @return        bool    Retrusn boolean value if method is called
    */
-  function transferFrom(address _from, address _to, uint _value) public onlyPayloadSize(3 * 32) returns (bool) {
-    if(!gittoken._transferFrom(_from, _to, _value)) {
-      throw;
-    } else {
-      Transfer(_from, _to, _value);
-      return true;
-    }
+  function transferFrom(
+    address _from,
+    address _to,
+    uint _value
+  )
+    externalTokenTransfersLocked
+    public
+    onlyPayloadSize(3)
+    returns (bool)
+  {
+    require(gittoken._transferFrom(_from, _to, _value));
+    Transfer(_from, _to, _value);
+    return true;
   }
 
   /**
@@ -286,13 +308,17 @@ contract GitToken is Ownable {
    * Ensure the approver must reset the approved value to 0 before changing to the desired amount.
    * see: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
    */
-  function approve(address _spender, uint _value) public onlyPayloadSize(2 * 32) returns (bool){
-    if(_value > 0 && gittoken.allowed[msg.sender][_spender] > 0) {
-      throw;
-    } else {
-      gittoken.allowed[msg.sender][_spender] = _value;
-      Approval(msg.sender, _spender, _value);
-    }
+  function approve(
+    address _spender,
+    uint _value
+  )
+    public
+    onlyPayloadSize(2)
+    returns (bool)
+  {
+    require(_value == 0 && gittoken.allowed[msg.sender][_spender] == 0);
+    gittoken.allowed[msg.sender][_spender] = _value;
+    Approval(msg.sender, _spender, _value);
   }
 
   /**
@@ -316,7 +342,11 @@ contract GitToken is Ownable {
   function setRewardValue(
     uint256 _rewardValue,
     string _rewardType
-  ) onlyOwner public returns (bool) {
+  )
+    onlyOwner
+    public
+    returns (bool)
+  {
     gittoken.rewardValues[_rewardType] = _rewardValue;
     RewardValueSet(_rewardType, '', _rewardValue, now);
     return true;
@@ -333,7 +363,11 @@ contract GitToken is Ownable {
     uint256 _reservedValue,
     string _rewardType,
     string _reservedType
-  ) onlyOwner public returns (bool) {
+  )
+    onlyOwner
+    public
+    returns (bool)
+  {
     gittoken.reservedValues[_rewardType][_reservedType] = _reservedValue;
     RewardValueSet(_rewardType, _reservedType, _reservedValue, now);
     return true;
@@ -345,13 +379,17 @@ contract GitToken is Ownable {
    * @param  _username    string  GitHub username of contributor,
    * @return              bool    Returns boolean value if method is called;
    */
-  function verifyContributor(address _contributor, string _username) onlyOwner public returns (bool) {
-    if(!gittoken._verifyContributor(_contributor, _username)) {
-      throw;
-    } else {
-      ContributorVerified(_contributor, _username, now);
-      return true;
-    }
+  function verifyContributor(
+    address _contributor,
+    string _username
+  )
+    onlyOwner
+    public
+    returns (bool)
+  {
+    require(gittoken._verifyContributor(_contributor, _username));
+    ContributorVerified(_contributor, _username, now);
+    return true;
   }
 
   /**
@@ -369,16 +407,37 @@ contract GitToken is Ownable {
     string _reservedType,
     uint _rewardBonus,
     string _deliveryID
-  ) onlyOwner public returns (bool) {
-    if(!gittoken._rewardContributor(_username, _rewardType, _reservedType, _rewardBonus, _deliveryID)) {
-      throw;
-    } else {
-      address _contributor = gittoken.contributorAddresses[_username];
-      uint _value = gittoken.rewardValues[_rewardType].add(_rewardBonus);
-      uint _reservedValue = gittoken.reservedValues[_rewardType][_reservedType];
-      Contribution(_contributor, _username, _value, _reservedValue, now, _rewardType);
-      return true;
-    }
+  )
+  onlyOwner
+  public
+  returns (bool) {
+    require(gittoken._rewardContributor(_username, _rewardType, _reservedType, _rewardBonus, _deliveryID));
+    address _contributor = gittoken.contributorAddresses[_username];
+    uint _value = gittoken.rewardValues[_rewardType].add(_rewardBonus);
+    uint _reservedValue = gittoken.reservedValues[_rewardType][_reservedType];
+
+    Contribution(_contributor, _username, _value, _reservedValue, now, _rewardType);
+
+    return true;
+  }
+
+  function initializeAuction(
+    uint _auctionPrice,
+    uint _delay,
+    bool _lockTokens
+  )
+  onlyOwner
+  public
+  returns (bool) {
+    require(gittoken._initializeAuction(_auctionPrice, _delay, _lockTokens));
+    NewAuction(
+      gittoken.auctionRound,
+      gittoken.auctionDetails[gittoken.auctionRound].startDate,
+      gittoken.auctionDetails[gittoken.auctionRound].endDate,
+      gittoken.auctionDetails[gittoken.auctionRound].tokensOffered,
+      gittoken.auctionDetails[gittoken.auctionRound].auctionPrice
+    );
+    return true;
   }
 
 
@@ -412,6 +471,14 @@ contract GitToken is Ownable {
   }
 
   /**
+   * @dev Get the date timestamp of when tokens are locked until
+   * @return _lockedUntil uint Timestamp of when tokens are locked until
+   */
+  function getTokenLockUntilDate() constant returns (uint _lockedUntil) {
+    return gittoken.lockTokenTransfersUntil;
+  }
+
+  /**
    * @dev Get unclaimed (pre-verified) rewards associated with GitHub username
    * @param  _username string GitHub username of contributor,
    * @return _value    uint   Number of tokens issued to GitHub username
@@ -420,14 +487,28 @@ contract GitToken is Ownable {
     return gittoken.unclaimedRewards[_username];
   }
 
+  function () {
+    revert();
+  }
+
   /**
-   * @dev Fix for the ERC20 short address attack.
+   * @dev This modifier checks the data length to ensure that it matches the padded
+   * length of the input data provided to the method.
    */
-  modifier onlyPayloadSize(uint size) {
-     if(msg.data.length < size + 4) {
-       throw;
-     }
+  modifier onlyPayloadSize(uint inputLength) {
+     require(msg.data.length == inputLength * 32 + 4);
      _;
+  }
+
+  /**
+   * @dev Disallow external token transfers if the current timestamp is less
+   * than the `lockTokenTransfersUntil` date.
+   * NOTE: Use `getTokenLockUntilDate` method to check date and mitigate
+   * cost of gas throwing;
+   */
+  modifier externalTokenTransfersLocked() {
+    require(now > gittoken.lockTokenTransfersUntil);
+    _;
   }
 
 
