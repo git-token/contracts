@@ -287,6 +287,7 @@ library GitTokenLib {
     require(tokenValue > 0);
     require(self.auctionDetails[_auctionRound].tokensOffered > 0);
     require(self.auctionDetails[_auctionRound].tokensOffered > tokenValue);
+    require(now >= self.auctionDetails[_auctionRound].endDate);
 
     self.balances[address(this)] = self.balances[address(this)].sub(tokenValue);
     self.auctionDetails[_auctionRound].tokensOffered = self.auctionDetails[_auctionRound].tokensOffered.sub(tokenValue);

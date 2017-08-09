@@ -21,9 +21,9 @@ function initContract() {
 }
 
 contract('GitToken', function(accounts) {
-  describe('GitToken::sealAuction', function() {
+  describe('GitToken::executeBid', function() {
 
-    it("Should create a reserved supply of tokens, initialize a new auction, and seal the auction with a weighted average price.", function() {
+    it("Should create a reserved supply of tokens, initialize a new auction, and seal the auction with a weighted average price, and attempt to execute a bid at the weighted average price.", function() {
       var gittoken;
       var auctionRound;
       return initContract().then((contract) => {
@@ -59,7 +59,6 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        // return gittoken.sealAuction(auctionRound, 7230 * (1e18 / (1e18 / Math.pow(10, decimals)) ));
         return gittoken.sealAuction(auctionRound, 7230);
       }).then(function(event) {
         console.log(event)
@@ -68,9 +67,17 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "SealAuction", "Expected a `SealAuction` event")
 
-        return gittoken.balanceOf(gittoken.address)
+        return gittoken.executeBid(auctionRound, { from: accounts[1], value: 1e18 })
+      }).then(function(event) {
+        console.log(event)
+        const { logs } = event
+        console.log(logs[0]['args'])
+        assert.equal(logs.length, 1, "Expect a logged event")
+        assert.equal(logs[0]['event'], "Transfer", "Expected a `Transfer` event")
+
+        return gittoken.balanceOf(accounts[1])
       }).then(function(balance) {
-        assert.equal(balance.toNumber(), 30000 * Math.pow(10, decimals), "Expected the balance of the user to be 30000 * Math.pow(10, decimals)")
+        assert.equal(balance.toNumber(), 7230 * Math.pow(10, decimals), "Expected the balance of the user to be 7230 * Math.pow(10, decimals)")
       }).catch(function(error) {
         assert.equal(error, null, error.message)
       })

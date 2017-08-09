@@ -460,13 +460,14 @@ contract GitToken is Ownable {
   public
   returns (bool) {
     require(gittoken._sealAuction(_auctionRound, _weightedAveragePrice));
-    SealAuction(_auctionRound, _weightedAveragePrice, now);
+    SealAuction(_auctionRound, _weightedAveragePrice * ( 10**18 / (10 ** 18 / 10 ** gittoken.decimals)), now);
     return true;
   }
 
 
   function executeBid(uint _auctionRound) payable public returns (bool) {
     uint tokenValue = gittoken._executeBid(_auctionRound, msg.sender, msg.value);
+    require(tokenValue > 0);
     Transfer(address(this), msg.sender, tokenValue);
     return true;
   }
