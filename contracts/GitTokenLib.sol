@@ -236,11 +236,9 @@ library GitTokenLib {
   ) internal returns(bool) {
     // Ensure the contract has enough tokens to move to auction;
 
-    uint initialPrice = 10 ** 18 / (10 ** 18 / 10 ** self.decimals) * _initialPrice;
-
-    if(self.balances[address(this)] == 0 || initialPrice == 0) {
+    if(self.balances[address(this)] == 0 || _initialPrice == 0) {
       throw;
-    } else if (initialPrice > self.balances[address(this)]) {
+    } else if (_initialPrice > self.balances[address(this)]) {
       throw;
     } else {
       self.auctionRound += 1;
@@ -255,7 +253,7 @@ library GitTokenLib {
         startDate,
         endDate,
         self.balances[address(this)],
-        initialPrice,
+        _initialPrice,
         0
       );
 
@@ -282,7 +280,7 @@ library GitTokenLib {
    */
   function _executeBid(Data storage self, uint _auctionRound, address _bidder, uint _eth )
     internal returns (uint _tokenValue) {
-    uint tokenValue = _eth / (10 ** 18 / 10 ** self.decimals) * self.auctionDetails[_auctionRound].weightedAveragePrice;
+    uint tokenValue = _eth / (10 ** 18 / self.auctionDetails[_auctionRound].weightedAveragePrice);
 
     require(tokenValue > 0);
     require(self.auctionDetails[_auctionRound].tokensOffered > 0);

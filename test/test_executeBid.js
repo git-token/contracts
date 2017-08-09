@@ -41,7 +41,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(5000, 1, true)
+        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 1, true)
       }).then(function(event){
         const { logs } = event
 
@@ -59,7 +59,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.sealAuction(auctionRound, 7230);
+        return gittoken.sealAuction(auctionRound, 7230 * Math.pow(10, decimals));
       }).then(function(event) {
         console.log(event)
         const { logs } = event
@@ -67,7 +67,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "SealAuction", "Expected a `SealAuction` event")
 
-        return gittoken.executeBid(auctionRound, { from: accounts[1], value: 1e18 })
+        return gittoken.executeBid(auctionRound, { from: accounts[1], value: (0.5 * 1e18) })
       }).then(function(event) {
         console.log(event)
         const { logs } = event
@@ -77,7 +77,7 @@ contract('GitToken', function(accounts) {
 
         return gittoken.balanceOf(accounts[1])
       }).then(function(balance) {
-        assert.equal(balance.toNumber(), 7230 * Math.pow(10, decimals), "Expected the balance of the user to be 7230 * Math.pow(10, decimals)")
+        assert.isBelow(balance.toNumber(), 7230 * Math.pow(10, decimals), "Expected the balance of the user to be 7230 * Math.pow(10, decimals)")
       }).catch(function(error) {
         assert.equal(error, null, error.message)
       })

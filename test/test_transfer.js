@@ -23,7 +23,7 @@ function initContract() {
 contract('GitToken', function(accounts) {
   describe('GitToken::transfer', function() {
 
-    it("", function() {
+    it("Should reward a contributor and allow that contributor to transfer one unit of the token", function() {
       var gittoken;
       return initContract().then((contract) => {
         gittoken = contract
