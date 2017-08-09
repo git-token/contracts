@@ -28,7 +28,7 @@ import './Ownable.sol';
 
 /**
  * @title GitToken Contract for distributing ERC20 tokens for Git contributions;
- * @author Ryan Michael Tate
+ * @author Ryan Michael Tate <ryan.tate@gittoken.io>
  */
 contract GitToken is Ownable {
 
@@ -89,7 +89,9 @@ contract GitToken is Ownable {
    * @param initialPrice       uint Initial price per token, denominated in ETH;
    * default (10 ** 18 / 10 ** _decimals) * 5000 tokens / ETH
    */
-  event NewAuction(uint auctionRound, uint startDate, uint endDate, uint tokensOffered, uint initialPrice);
+  event NewAuction(uint auctionRound, uint startDate, uint endDate, uint lockDate, uint tokensOffered, uint initialPrice);
+
+  event SealAuction(uint auctionRound, uint weightedAveragePrice, uint date);
 
   /**
    * @dev Constructor method for GitToken Contract,
@@ -109,7 +111,10 @@ contract GitToken is Ownable {
     uint _decimals
   ) {
     if (_contributor != 0x0) {
+      // Set initial contributor username & address
       owner[_contributor] = true;
+      gittoken.contributorUsernames[_contributor] = _username;
+      gittoken.contributorAddresses[_username] = _contributor;
     }
 
     gittoken.totalSupply = 0;
@@ -118,9 +123,6 @@ contract GitToken is Ownable {
     gittoken.symbol = _symbol;
     gittoken.decimals = _decimals;
 
-    // Set initial contributor username & address
-    /*gittoken.contributorUsernames[_contributor] = _username;
-    gittoken.contributorAddresses[_username] = _contributor;*/
 
     gittoken.reservedValues['milestone']['created']           = 0 * 10**_decimals;
 
@@ -267,7 +269,7 @@ contract GitToken is Ownable {
     address _to,
     uint _value
   )
-    externalTokenTransfersLocked 
+    externalTokenTransfersLocked
     public
     returns (bool)
   {
@@ -421,22 +423,51 @@ contract GitToken is Ownable {
     return true;
   }
 
+  /**
+   * @dev Initialize Auction & broadcast a NewAuction event
+   * @param  _initialPrice uint Token/ETH Exchange Rate (#Tokens / 1 ETH); adjusted for decimal representation;
+   * @param  _delay        uint Time in milliseconds to delay each auction period (I - Pre, II - Start, III - End, IV - Post),
+   * Must be greater than 86400 (1 day in unix time)
+   * @param  _lockTokens   bool Boolean value to optionally lock all token transfers until the Post auction date.
+   * @return               bool Returns Boolean value if called from another contract;
+   */
   function initializeAuction(
-    uint _auctionPrice,
+    uint _initialPrice,
     uint _delay,
     bool _lockTokens
   )
   onlyOwner
   public
   returns (bool) {
-    require(gittoken._initializeAuction(_auctionPrice, _delay, _lockTokens));
+    require(gittoken._initializeAuction(_initialPrice, _delay, _lockTokens));
     NewAuction(
       gittoken.auctionRound,
       gittoken.auctionDetails[gittoken.auctionRound].startDate,
       gittoken.auctionDetails[gittoken.auctionRound].endDate,
+      gittoken.lockTokenTransfersUntil,
       gittoken.auctionDetails[gittoken.auctionRound].tokensOffered,
-      gittoken.auctionDetails[gittoken.auctionRound].auctionPrice
+      gittoken.auctionDetails[gittoken.auctionRound].initialPrice
     );
+    return true;
+  }
+
+
+  function sealAuction(
+    uint _auctionRound,
+    uint _weightedAveragePrice
+  )
+  onlyOwner
+  public
+  returns (bool) {
+    require(gittoken._sealAuction(_auctionRound, _weightedAveragePrice));
+    SealAuction(_auctionRound, _weightedAveragePrice, now);
+    return true;
+  }
+
+
+  function executeBid(uint _auctionRound) payable public returns (bool) {
+    uint tokenValue = gittoken._executeBid(_auctionRound, msg.sender, msg.value);
+    Transfer(address(this), msg.sender, tokenValue);
     return true;
   }
 

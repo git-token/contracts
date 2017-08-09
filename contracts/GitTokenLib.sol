@@ -24,7 +24,7 @@ pragma solidity ^0.4.11;
 import './SafeMath.sol';
 /**
  * @title GitTokenLib Library for implementing GitToken contract methods
- * @author Ryan Michael Tate
+ * @author Ryan Michael Tate <ryan.tate@gittoken.io>
  */
 library GitTokenLib {
 
@@ -35,7 +35,8 @@ library GitTokenLib {
     uint startDate;
     uint endDate;
     uint tokensOffered;
-    uint auctionPrice;
+    uint initialPrice;
+    uint weightedAveragePrice;
   }
 
   /**
@@ -220,33 +221,78 @@ library GitTokenLib {
     return true;
   }
 
+  /**
+   * @dev Internal Initialize Auction
+   * @param  _initialPrice uint Token/ETH Exchange Rate (#Tokens / 1 ETH)
+   * @param  _delay        uint Time in milliseconds to delay each auction period (I - Pre, II - Start, III - End, IV - Post)
+   * @param  _lockTokens   bool Boolean value to optionally lock all token transfers until the Post auction date.
+   * @return               bool Returns Boolean value when called from parent contract;
+   */
   function _initializeAuction(
     Data storage self,
-    uint _auctionPrice,
+    uint _initialPrice,
     uint _delay,
     bool _lockTokens
   ) internal returns(bool) {
     // Ensure the contract has enough tokens to move to auction;
-    require(self.balances[address(this)] != 0);
-    self.auctionRound += 1;
 
-    uint delay     = _delay > 60*60*24 ? _delay : 60*60*24*3;
-    uint startDate = now.add(delay);
-    uint endDate   = startDate.add(delay);
+    uint initialPrice = 10 ** 18 / (10 ** 18 / 10 ** self.decimals) * _initialPrice;
 
-    self.auctionDetails[self.auctionRound] = Auction(
-      self.auctionRound,
-      startDate,
-      endDate,
-      self.balances[address(this)],
-      _auctionPrice * (10 ** 18 / 10 ** self.decimals)
-    );
+    if(self.balances[address(this)] == 0 || initialPrice == 0) {
+      throw;
+    } else if (initialPrice > self.balances[address(this)]) {
+      throw;
+    } else {
+      self.auctionRound += 1;
 
-    _lockTokens == true ?
-      self.lockTokenTransfersUntil = endDate.add(delay) :
-      self.lockTokenTransfersUntil = 0;
+      /*uint delay     = _delay > 60*60*24 ? _delay : 60*60*24*3;*/
+      uint delay     = _delay > 0 ? _delay : 60*60*24*3;
+      uint startDate = now.add(delay);
+      uint endDate   = startDate.add(delay);
 
+      self.auctionDetails[self.auctionRound] = Auction(
+        self.auctionRound,
+        startDate,
+        endDate,
+        self.balances[address(this)],
+        initialPrice,
+        0
+      );
+
+      _lockTokens == true ?
+        self.lockTokenTransfersUntil = endDate.add(delay) :
+        self.lockTokenTransfersUntil = 0;
+
+      return true;
+    }
+  }
+
+  /**
+   * @dev Internal
+   */
+  function _sealAuction(Data storage self, uint _auctionRound, uint _weightedAveragePrice)
+    internal returns (bool) {
+    require(now >= self.auctionDetails[_auctionRound].endDate);
+    self.auctionDetails[_auctionRound].weightedAveragePrice = _weightedAveragePrice;
     return true;
+  }
+
+  /**
+   * @dev Internal
+   */
+  function _executeBid(Data storage self, uint _auctionRound, address _bidder, uint _eth )
+    internal returns (uint _tokenValue) {
+    uint tokenValue = _eth / (10 ** 18 / 10 ** self.decimals) * self.auctionDetails[_auctionRound].weightedAveragePrice;
+
+    require(tokenValue > 0);
+    require(self.auctionDetails[_auctionRound].tokensOffered > 0);
+    require(self.auctionDetails[_auctionRound].tokensOffered > tokenValue);
+
+    self.balances[address(this)] = self.balances[address(this)].sub(tokenValue);
+    self.auctionDetails[_auctionRound].tokensOffered = self.auctionDetails[_auctionRound].tokensOffered.sub(tokenValue);
+    self.balances[_bidder] = self.balances[_bidder].add(tokenValue);
+
+    return tokenValue;
   }
 
 }
