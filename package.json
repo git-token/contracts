@@ -28,5 +28,7 @@
   ],
   "author": "GitToken",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "web3": "^1.0.0-beta.18"
+  }
 }

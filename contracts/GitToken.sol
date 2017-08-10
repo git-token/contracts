@@ -91,7 +91,9 @@ contract GitToken is Ownable {
    */
   event NewAuction(uint auctionRound, uint startDate, uint endDate, uint lockDate, uint tokensOffered, uint initialPrice);
 
-  event SealAuction(uint auctionRound, uint weightedAveragePrice, uint date);
+  event SealAuction(uint auctionRound, uint weightedAveragePrice, uint fundLimit, uint date);
+
+  event AuctionResults(uint auctionRound, uint numberOfHolders, uint fundsCollected, uint date);
 
   /**
    * @dev Constructor method for GitToken Contract,
@@ -460,15 +462,29 @@ contract GitToken is Ownable {
   public
   returns (bool) {
     require(gittoken._sealAuction(_auctionRound, _weightedAveragePrice));
-    SealAuction(_auctionRound, _weightedAveragePrice, now);
+    SealAuction(
+      _auctionRound,
+      gittoken.auctionDetails[_auctionRound].weightedAveragePrice,
+      gittoken.auctionDetails[_auctionRound].fundLimit,
+      now
+    );
     return true;
   }
 
 
   function executeBid(uint _auctionRound) payable public returns (bool) {
     uint tokenValue = gittoken._executeBid(_auctionRound, msg.sender, msg.value);
-    require(tokenValue > 0);
     Transfer(address(this), msg.sender, tokenValue);
+
+    /*if (gittoken.auctionDetails[_auctionRound].finalized) {
+      AuctionResults(
+        _auctionRound,
+        gittoken.auctionDetails[_auctionRound].numberOfHolders,
+        gittoken.auctionDetails[_auctionRound].fundsCollected,
+        now
+      );
+    }*/
+
     return true;
   }
 

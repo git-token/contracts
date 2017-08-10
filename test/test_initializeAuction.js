@@ -40,7 +40,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(5000, 0, true)
+        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 0, true)
       }).then(function(event){
         const { logs } = event
         console.log(event)
@@ -55,7 +55,7 @@ contract('GitToken', function(accounts) {
 
         return gittoken.balanceOf(accounts[0])
       }).then(function(balance) {
-        assert(balance.toNumber(), 1000, "Expected the balance of the user to be 1000")
+        assert(balance.toNumber(), 1000 * Math.pow(10, decimals), "Expected the balance of the user to be 1000 * Math.pow(10, decimals)")
       }).catch(function(error) {
         assert.equal(error, null, error.message)
       })
@@ -78,7 +78,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(5000, 0, false)
+        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 0, false)
       }).then(function(event){
         const { logs } = event
         assert.equal(logs.length, 1, "Expect a logged event")
@@ -92,7 +92,7 @@ contract('GitToken', function(accounts) {
 
         return gittoken.balanceOf(accounts[0])
       }).then(function(balance) {
-        assert(balance.toNumber(), 1000, "Expected the balance of the user to be 1000")
+        assert(balance.toNumber(), 1000 * Math.pow(10, decimals), "Expected the balance of the user to be 1000")
       }).catch(function(error) {
         assert.equal(error, null, error.message)
       })
@@ -115,7 +115,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(20000, 0, false)
+        return gittoken.initializeAuction(20000 * Math.pow(10, decimals), 0, false)
       }).then(function(event){
         console.log(event)
         const { logs } = event

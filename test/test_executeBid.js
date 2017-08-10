@@ -1,7 +1,10 @@
 var GitToken = artifacts.require("./GitToken.sol");
 var Promise = require("bluebird")
 const { contributorAddress, username, name, organization, symbol, decimals } = require('../gittoken.config')
+const { networks: { development: { host, port } } } = require('../truffle.js');
 
+var Web3 = require('web3')
+var web3 = new Web3(new Web3.providers.HttpProvider(`http://${host}:${port}`))
 
 function initContract() {
   return new Promise((resolve, reject) => {
@@ -67,7 +70,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "SealAuction", "Expected a `SealAuction` event")
 
-        return gittoken.executeBid(auctionRound, { from: accounts[1], value: (0.5 * 1e18) })
+        return gittoken.executeBid(auctionRound, { from: accounts[1], value: 50e18 })
       }).then(function(event) {
         console.log(event)
         const { logs } = event
@@ -77,7 +80,13 @@ contract('GitToken', function(accounts) {
 
         return gittoken.balanceOf(accounts[1])
       }).then(function(balance) {
-        assert.isBelow(balance.toNumber(), 7230 * Math.pow(10, decimals), "Expected the balance of the user to be 7230 * Math.pow(10, decimals)")
+        assert.isAtLeast(balance.toNumber(), 15000 * Math.pow(10, decimals), "Expected the balance of the user to be 15000 * Math.pow(10, decimals)")
+
+        return web3.eth.getBalance(gittoken.address)
+      }).then(function(balance) {
+        var fundLimit = (15000 * Math.pow(10, decimals)) * (1e18 / (7230 * Math.pow(10, decimals))) / 1e18
+        assert.isAtLeast((parseInt(balance.toString()) / 1e18).toFixed(3), fundLimit.toFixed(3), "Expected the balance of the user to be 15000 * Math.pow(10, decimals)")
+
       }).catch(function(error) {
         assert.equal(error, null, error.message)
       })

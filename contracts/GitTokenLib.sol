@@ -37,6 +37,10 @@ library GitTokenLib {
     uint tokensOffered;
     uint initialPrice;
     uint weightedAveragePrice;
+    uint fundsCollected;
+    uint fundLimit;
+    uint numberOfHolders;
+    bool finalized;
   }
 
   /**
@@ -243,22 +247,21 @@ library GitTokenLib {
     } else {
       self.auctionRound += 1;
 
-      /*uint delay     = _delay > 60*60*24 ? _delay : 60*60*24*3;*/
-      uint delay     = _delay > 0 ? _delay : 60*60*24*3;
-      uint startDate = now.add(delay);
-      uint endDate   = startDate.add(delay);
+      /*uint delay = _delay > 60*60*24 ? _delay : 60*60*24*3;*/
+      uint delay = _delay > 0 ? _delay : 60*60*24*3;
 
-      self.auctionDetails[self.auctionRound] = Auction(
-        self.auctionRound,
-        startDate,
-        endDate,
-        self.balances[address(this)],
-        _initialPrice,
-        0
-      );
+      self.auctionDetails[self.auctionRound].startDate            = now.add(delay);
+      self.auctionDetails[self.auctionRound].endDate              = self.auctionDetails[self.auctionRound].startDate.add(delay);
+      self.auctionDetails[self.auctionRound].tokensOffered        = self.balances[address(this)];
+      self.auctionDetails[self.auctionRound].initialPrice         = _initialPrice;
+      self.auctionDetails[self.auctionRound].weightedAveragePrice = 0;
+      self.auctionDetails[self.auctionRound].fundsCollected       = 0;
+      self.auctionDetails[self.auctionRound].fundLimit            = 0;
+      self.auctionDetails[self.auctionRound].numberOfHolders      = 0;
+      self.auctionDetails[self.auctionRound].finalized            = false;
 
       _lockTokens == true ?
-        self.lockTokenTransfersUntil = endDate.add(delay) :
+        self.lockTokenTransfersUntil = self.auctionDetails[self.auctionRound].endDate.add(delay) :
         self.lockTokenTransfersUntil = 0;
 
       return true;
@@ -272,6 +275,7 @@ library GitTokenLib {
     internal returns (bool) {
     require(now >= self.auctionDetails[_auctionRound].endDate);
     self.auctionDetails[_auctionRound].weightedAveragePrice = _weightedAveragePrice;
+    self.auctionDetails[_auctionRound].fundLimit = self.auctionDetails[_auctionRound].tokensOffered * (10 ** 18 / _weightedAveragePrice);
     return true;
   }
 
@@ -280,16 +284,31 @@ library GitTokenLib {
    */
   function _executeBid(Data storage self, uint _auctionRound, address _bidder, uint _eth )
     internal returns (uint _tokenValue) {
-    uint tokenValue = _eth / (10 ** 18 / self.auctionDetails[_auctionRound].weightedAveragePrice);
+    require(self.auctionDetails[_auctionRound].finalized == false);
+    uint fundingRemaining = self.auctionDetails[_auctionRound].fundLimit.sub(self.auctionDetails[_auctionRound].fundsCollected);
+    uint fundingValue = _eth >= fundingRemaining ? fundingRemaining : _eth;
+    uint remainderValue = _eth > fundingRemaining ? _eth - fundingRemaining : 0;
+
+    if (remainderValue > 0) {
+      _bidder.transfer(remainderValue);
+    }
+
+    uint tokenValue = fundingValue / (10 ** 18 / self.auctionDetails[_auctionRound].weightedAveragePrice);
 
     require(tokenValue > 0);
     require(self.auctionDetails[_auctionRound].tokensOffered > 0);
-    require(self.auctionDetails[_auctionRound].tokensOffered > tokenValue);
+    require(self.auctionDetails[_auctionRound].tokensOffered >= tokenValue);
     require(now >= self.auctionDetails[_auctionRound].endDate);
 
-    self.balances[address(this)] = self.balances[address(this)].sub(tokenValue);
+    self.auctionDetails[_auctionRound].numberOfHolders = self.auctionDetails[_auctionRound].numberOfHolders.add(1);
+    self.auctionDetails[_auctionRound].fundsCollected = self.auctionDetails[_auctionRound].fundsCollected.add(fundingValue);
     self.auctionDetails[_auctionRound].tokensOffered = self.auctionDetails[_auctionRound].tokensOffered.sub(tokenValue);
+    self.balances[address(this)] = self.balances[address(this)].sub(tokenValue);
     self.balances[_bidder] = self.balances[_bidder].add(tokenValue);
+
+    if (self.auctionDetails[_auctionRound].fundsCollected >= self.auctionDetails[_auctionRound].fundLimit) {
+      self.auctionDetails[_auctionRound].finalized = true;
+    }
 
     return tokenValue;
   }
