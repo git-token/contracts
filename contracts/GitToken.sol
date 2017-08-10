@@ -476,14 +476,14 @@ contract GitToken is Ownable {
     uint tokenValue = gittoken._executeBid(_auctionRound, msg.sender, msg.value);
     Transfer(address(this), msg.sender, tokenValue);
 
-    /*if (gittoken.auctionDetails[_auctionRound].finalized) {
+    if (gittoken.auctionDetails[_auctionRound].finalized) {
       AuctionResults(
         _auctionRound,
         gittoken.auctionDetails[_auctionRound].numberOfHolders,
         gittoken.auctionDetails[_auctionRound].fundsCollected,
         now
       );
-    }*/
+    }
 
     return true;
   }

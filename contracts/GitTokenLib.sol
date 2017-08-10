@@ -274,6 +274,7 @@ library GitTokenLib {
   function _sealAuction(Data storage self, uint _auctionRound, uint _weightedAveragePrice)
     internal returns (bool) {
     require(now >= self.auctionDetails[_auctionRound].endDate);
+    require(_weightedAveragePrice > 0);
     self.auctionDetails[_auctionRound].weightedAveragePrice = _weightedAveragePrice;
     self.auctionDetails[_auctionRound].fundLimit = self.auctionDetails[_auctionRound].tokensOffered * (10 ** 18 / _weightedAveragePrice);
     return true;
