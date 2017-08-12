@@ -247,8 +247,8 @@ library GitTokenLib {
     } else {
       self.auctionRound += 1;
 
-      /*uint delay = _delay > 60*60*24 ? _delay : 60*60*24*3;*/
-      uint delay = _delay > 0 ? _delay : 60*60*24*3;
+      uint delay = _delay > 60*60*24 ? _delay : 60*60*24*3;
+      /*uint delay = _delay > 0 ? _delay : 60*60*24*3;*/
 
       self.auctionDetails[self.auctionRound].startDate            = now.add(delay);
       self.auctionDetails[self.auctionRound].endDate              = self.auctionDetails[self.auctionRound].startDate.add(delay);
