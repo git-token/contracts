@@ -29,18 +29,23 @@ import './SafeMath.sol';
 library GitTokenLib {
 
   using SafeMath for uint;
+  using SafeMath for uint[];
 
   struct Auction {
     uint round;
     uint startDate;
     uint endDate;
+    uint lockDate;
     uint tokensOffered;
     uint initialPrice;
-    uint weightedAveragePrice;
+    uint wtdAvgExRate;
     uint fundsCollected;
     uint fundLimit;
-    uint numberOfHolders;
+    uint numBids;
+    uint tokenLimitFactor;
     bool finalized;
+    uint[] ethValues;
+    uint[] exRateValues;
   }
 
   /**
@@ -237,81 +242,111 @@ library GitTokenLib {
     uint _initialPrice,
     uint _delay,
     bool _lockTokens
-  ) internal returns(bool) {
+  ) internal returns(uint[8]) {
     // Ensure the contract has enough tokens to move to auction;
-
     if(self.balances[address(this)] == 0 || _initialPrice == 0) {
       throw;
     } else if (_initialPrice > self.balances[address(this)]) {
       throw;
     } else {
-      self.auctionRound += 1;
+      self.auctionRound = self.auctionRound.add(1);
 
       uint delay = _delay > 60*60*24 ? _delay : 60*60*24*3;
       /*uint delay = _delay > 0 ? _delay : 60*60*24*3;*/
 
-      self.auctionDetails[self.auctionRound].startDate            = now.add(delay);
-      self.auctionDetails[self.auctionRound].endDate              = self.auctionDetails[self.auctionRound].startDate.add(delay);
-      self.auctionDetails[self.auctionRound].tokensOffered        = self.balances[address(this)];
-      self.auctionDetails[self.auctionRound].initialPrice         = _initialPrice;
-      self.auctionDetails[self.auctionRound].weightedAveragePrice = 0;
-      self.auctionDetails[self.auctionRound].fundsCollected       = 0;
-      self.auctionDetails[self.auctionRound].fundLimit            = 0;
-      self.auctionDetails[self.auctionRound].numberOfHolders      = 0;
-      self.auctionDetails[self.auctionRound].finalized            = false;
+      self.auctionDetails[self.auctionRound].startDate        = now.add(delay);
+      self.auctionDetails[self.auctionRound].endDate          = self.auctionDetails[self.auctionRound].startDate.add(delay);
+      self.auctionDetails[self.auctionRound].tokensOffered    = self.balances[address(this)];
+      self.auctionDetails[self.auctionRound].initialPrice     = _initialPrice;
+      self.auctionDetails[self.auctionRound].wtdAvgExRate     = 0;
+      self.auctionDetails[self.auctionRound].fundsCollected   = 0;
+      self.auctionDetails[self.auctionRound].fundLimit        = self.balances[address(this)] * (10**18 / _initialPrice);
+      self.auctionDetails[self.auctionRound].numBids          = 0;
+      self.auctionDetails[self.auctionRound].tokenLimitFactor = 20;
+      self.auctionDetails[self.auctionRound].finalized        = false;
 
       _lockTokens == true ?
         self.lockTokenTransfersUntil = self.auctionDetails[self.auctionRound].endDate.add(delay) :
         self.lockTokenTransfersUntil = 0;
 
-      return true;
+      return ([
+        self.auctionRound,
+        self.auctionDetails[self.auctionRound].startDate,
+        self.auctionDetails[self.auctionRound].endDate,
+        self.lockTokenTransfersUntil,
+        self.auctionDetails[self.auctionRound].tokensOffered,
+        self.auctionDetails[self.auctionRound].initialPrice,
+        self.auctionDetails[self.auctionRound].fundLimit,
+        self.auctionDetails[self.auctionRound].tokenLimitFactor
+      ]);
     }
   }
 
-  /**
-   * @dev Internal
-   */
-  function _sealAuction(Data storage self, uint _auctionRound, uint _weightedAveragePrice)
-    internal returns (bool) {
-    require(now >= self.auctionDetails[_auctionRound].endDate);
-    require(_weightedAveragePrice > 0);
-    self.auctionDetails[_auctionRound].weightedAveragePrice = _weightedAveragePrice;
-    self.auctionDetails[_auctionRound].fundLimit = self.auctionDetails[_auctionRound].tokensOffered * (10 ** 18 / _weightedAveragePrice);
-    return true;
-  }
+
 
   /**
    * @dev Internal
    */
-  function _executeBid(Data storage self, uint _auctionRound, address _bidder, uint _eth )
-    internal returns (uint _tokenValue) {
+  function _executeBid(
+    Data storage self,
+    uint _auctionRound,
+    uint _exRate
+  ) internal returns (uint[9] bidData) {
     require(self.auctionDetails[_auctionRound].finalized == false);
-    uint fundingRemaining = self.auctionDetails[_auctionRound].fundLimit.sub(self.auctionDetails[_auctionRound].fundsCollected);
-    uint fundingValue = _eth >= fundingRemaining ? fundingRemaining : _eth;
-    uint remainderValue = _eth > fundingRemaining ? _eth - fundingRemaining : 0;
+    require(self.auctionDetails[_auctionRound].fundLimit > 0);
+    require(msg.value > 0);
 
-    if (remainderValue > 0) {
-      _bidder.transfer(remainderValue);
-    }
+    self.auctionDetails[_auctionRound].ethValues.push(msg.value);
+    self.auctionDetails[_auctionRound].exRateValues.push(_exRate);
 
-    uint tokenValue = fundingValue / (10 ** 18 / self.auctionDetails[_auctionRound].weightedAveragePrice);
+    self.auctionDetails[_auctionRound].wtdAvgExRate =
+      self.auctionDetails[_auctionRound].ethValues.wtdAvg(
+        self.auctionDetails[_auctionRound].exRateValues
+      );
 
-    require(tokenValue > 0);
-    require(self.auctionDetails[_auctionRound].tokensOffered > 0);
-    require(self.auctionDetails[_auctionRound].tokensOffered >= tokenValue);
-    require(now >= self.auctionDetails[_auctionRound].endDate);
+    require(_exRate <= self.auctionDetails[_auctionRound].wtdAvgExRate);
 
-    self.auctionDetails[_auctionRound].numberOfHolders = self.auctionDetails[_auctionRound].numberOfHolders.add(1);
-    self.auctionDetails[_auctionRound].fundsCollected = self.auctionDetails[_auctionRound].fundsCollected.add(fundingValue);
-    self.auctionDetails[_auctionRound].tokensOffered = self.auctionDetails[_auctionRound].tokensOffered.sub(tokenValue);
-    self.balances[address(this)] = self.balances[address(this)].sub(tokenValue);
-    self.balances[_bidder] = self.balances[_bidder].add(tokenValue);
+    require(
+      (self.auctionDetails[_auctionRound].wtdAvgExRate - _exRate) < self.auctionDetails[_auctionRound].tokenLimitFactor * 10**8
+    );
+
+    uint _adjTokens = self.auctionDetails[_auctionRound].tokensOffered.div(self.auctionDetails[_auctionRound].tokenLimitFactor);
+    uint adjEth = _adjTokens * (10**18 / self.auctionDetails[_auctionRound].wtdAvgExRate);
+    uint refundAmount = msg.value > adjEth ? msg.value - adjEth : 0;
+
+    if (refundAmount > 0) { msg.sender.transfer(refundAmount); }
+
+    uint _ethPaid = refundAmount == 0 ? msg.value : adjEth;
+
+    _adjTokens = _ethPaid / (10**18 / self.auctionDetails[_auctionRound].wtdAvgExRate);
+
+    self.auctionDetails[self.auctionRound].fundsCollected =
+      self.auctionDetails[self.auctionRound].fundsCollected.add(_ethPaid);
+
+    self.balances[address(this)] = self.balances[address(this)].sub(_adjTokens);
+    self.balances[msg.sender] = self.balances[msg.sender].add(_adjTokens);
+
+    self.auctionDetails[self.auctionRound].tokensOffered =
+      self.auctionDetails[self.auctionRound].tokensOffered.sub(_adjTokens);
+
+    self.auctionDetails[_auctionRound].fundLimit =
+      self.auctionDetails[_auctionRound].fundLimit.sub(msg.value.sub(_ethPaid));
 
     if (self.auctionDetails[_auctionRound].fundsCollected >= self.auctionDetails[_auctionRound].fundLimit) {
       self.auctionDetails[_auctionRound].finalized = true;
     }
 
-    return tokenValue;
+    return ([
+      _auctionRound,
+      _exRate,
+      self.auctionDetails[_auctionRound].wtdAvgExRate,
+      _adjTokens,
+      _ethPaid,
+      refundAmount,
+      self.auctionDetails[_auctionRound].fundsCollected,
+      self.auctionDetails[_auctionRound].fundLimit,
+      now
+    ]);
   }
 
 }

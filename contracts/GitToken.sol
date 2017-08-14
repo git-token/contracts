@@ -81,19 +81,9 @@ contract GitToken is Ownable {
    */
   event RewardValueSet(string rewardType, string reservedType, uint value, uint date);
 
-  /**
-   * @dev
-   * @param startDate          uint Start date of the auction
-   * @param endDate            uint End date of the auction
-   * @param tokensOffered uint Token supply offered during the auction
-   * @param initialPrice       uint Initial price per token, denominated in ETH;
-   * default (10 ** 18 / 10 ** _decimals) * 5000 tokens / ETH
-   */
-  event NewAuction(uint auctionRound, uint startDate, uint endDate, uint lockDate, uint tokensOffered, uint initialPrice);
 
-  event SealAuction(uint auctionRound, uint weightedAveragePrice, uint fundLimit, uint date);
-
-  event AuctionResults(uint auctionRound, uint numberOfHolders, uint fundsCollected, uint date);
+  event Auction(uint[8] auctionDetails);
+  event AuctionBid(uint[9] bidDetails);
 
   /**
    * @dev Constructor method for GitToken Contract,
@@ -439,54 +429,13 @@ contract GitToken is Ownable {
     uint _initialPrice,
     uint _delay,
     bool _lockTokens
-  )
-  onlyOwner
-  public
-  returns (bool) {
-    require(gittoken._initializeAuction(_initialPrice, _delay, _lockTokens));
-    NewAuction(
-      gittoken.auctionRound,
-      gittoken.auctionDetails[gittoken.auctionRound].startDate,
-      gittoken.auctionDetails[gittoken.auctionRound].endDate,
-      gittoken.lockTokenTransfersUntil,
-      gittoken.auctionDetails[gittoken.auctionRound].tokensOffered,
-      gittoken.auctionDetails[gittoken.auctionRound].initialPrice
-    );
+  ) onlyOwner public returns (bool) {
+    Auction(gittoken._initializeAuction(_initialPrice, _delay, _lockTokens));
     return true;
   }
 
-
-  function sealAuction(
-    uint _auctionRound,
-    uint _weightedAveragePrice
-  )
-  onlyOwner
-  public
-  returns (bool) {
-    require(gittoken._sealAuction(_auctionRound, _weightedAveragePrice));
-    SealAuction(
-      _auctionRound,
-      gittoken.auctionDetails[_auctionRound].weightedAveragePrice,
-      gittoken.auctionDetails[_auctionRound].fundLimit,
-      now
-    );
-    return true;
-  }
-
-
-  function executeBid(uint _auctionRound) payable public returns (bool) {
-    uint tokenValue = gittoken._executeBid(_auctionRound, msg.sender, msg.value);
-    Transfer(address(this), msg.sender, tokenValue);
-
-    if (gittoken.auctionDetails[_auctionRound].finalized) {
-      AuctionResults(
-        _auctionRound,
-        gittoken.auctionDetails[_auctionRound].numberOfHolders,
-        gittoken.auctionDetails[_auctionRound].fundsCollected,
-        now
-      );
-    }
-
+  function executeBid(uint _auctionRound, uint _exchangeRate) payable public returns (bool) {
+    AuctionBid(gittoken._executeBid(_auctionRound, _exchangeRate));
     return true;
   }
 
