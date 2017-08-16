@@ -40,13 +40,11 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 0, true)
+        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 0, 20, true)
       }).then(function(event){
         const { logs } = event
-        console.log(event)
-        console.log(logs[0]['args'])
         assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "NewAuction", "Expected a `NewAuction` event")
+        assert.equal(logs[0]['event'], "Auction", "Expected a `Auction` event")
 
         return gittoken.transfer("0x8CB2CeBB0070b231d4BA4D3b747acAebDFbbD142", 100e8)
       }).then(function(event) {
@@ -78,11 +76,11 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 0, false)
+        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 0, 20, false)
       }).then(function(event){
         const { logs } = event
         assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "NewAuction", "Expected a `NewAuction` event")
+        assert.equal(logs[0]['event'], "Auction", "Expected a `Auction` event")
 
         return gittoken.transfer("0x8CB2CeBB0070b231d4BA4D3b747acAebDFbbD142", 100e8)
       }).then(function(event) {
@@ -115,9 +113,8 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(20000 * Math.pow(10, decimals), 0, false)
+        return gittoken.initializeAuction(20000 * Math.pow(10, decimals), 0, 20, false)
       }).then(function(event){
-        console.log(event)
         const { logs } = event
         assert.equal(logs.length, 0, "Expected no events from transaction")
 
