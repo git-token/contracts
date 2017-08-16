@@ -241,6 +241,7 @@ library GitTokenLib {
     Data storage self,
     uint _initialPrice,
     uint _delay,
+    uint _tokenLimitFactor,
     bool _lockTokens
   ) internal returns(uint[8]) {
     // Ensure the contract has enough tokens to move to auction;
@@ -251,8 +252,8 @@ library GitTokenLib {
     } else {
       self.auctionRound = self.auctionRound.add(1);
 
-      uint delay = _delay > 60*60*24 ? _delay : 60*60*24*3;
-      /*uint delay = _delay > 0 ? _delay : 60*60*24*3;*/
+      /*uint delay = _delay > 60*60*24 ? _delay : 60*60*24*3;*/
+      uint delay = _delay > 0 ? _delay : 60*60*24*3;
 
       self.auctionDetails[self.auctionRound].startDate        = now.add(delay);
       self.auctionDetails[self.auctionRound].endDate          = self.auctionDetails[self.auctionRound].startDate.add(delay);
@@ -262,7 +263,7 @@ library GitTokenLib {
       self.auctionDetails[self.auctionRound].fundsCollected   = 0;
       self.auctionDetails[self.auctionRound].fundLimit        = self.balances[address(this)] * (10**18 / _initialPrice);
       self.auctionDetails[self.auctionRound].numBids          = 0;
-      self.auctionDetails[self.auctionRound].tokenLimitFactor = 20;
+      self.auctionDetails[self.auctionRound].tokenLimitFactor = _tokenLimitFactor;
       self.auctionDetails[self.auctionRound].finalized        = false;
 
       _lockTokens == true ?
@@ -292,6 +293,7 @@ library GitTokenLib {
     uint _auctionRound,
     uint _exRate
   ) internal returns (uint[9] bidData) {
+    require(self.auctionDetails[_auctionRound].endDate <= now);
     require(self.auctionDetails[_auctionRound].finalized == false);
     require(self.auctionDetails[_auctionRound].fundLimit > 0);
     require(msg.value > 0);

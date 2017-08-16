@@ -408,11 +408,14 @@ contract GitToken is Ownable {
   public
   returns (bool) {
     require(gittoken._rewardContributor(_username, _rewardType, _reservedType, _rewardBonus, _deliveryID));
-    address _contributor = gittoken.contributorAddresses[_username];
-    uint _value = gittoken.rewardValues[_rewardType].add(_rewardBonus);
-    uint _reservedValue = gittoken.reservedValues[_rewardType][_reservedType];
-
-    Contribution(_contributor, _username, _value, _reservedValue, now, _rewardType);
+    Contribution(
+      gittoken.contributorAddresses[_username],
+      _username,
+      gittoken.rewardValues[_rewardType].add(_rewardBonus),
+      gittoken.reservedValues[_rewardType][_reservedType],
+      now,
+      _rewardType
+    );
 
     return true;
   }
@@ -428,13 +431,17 @@ contract GitToken is Ownable {
   function initializeAuction(
     uint _initialPrice,
     uint _delay,
+    uint _tokenLimitFactor,
     bool _lockTokens
   ) onlyOwner public returns (bool) {
-    Auction(gittoken._initializeAuction(_initialPrice, _delay, _lockTokens));
+    Auction(gittoken._initializeAuction(_initialPrice, _delay, _tokenLimitFactor, _lockTokens));
     return true;
   }
 
-  function executeBid(uint _auctionRound, uint _exchangeRate) payable public returns (bool) {
+  function executeBid(
+    uint _auctionRound,
+    uint _exchangeRate
+  ) payable public returns (bool) {
     AuctionBid(gittoken._executeBid(_auctionRound, _exchangeRate));
     return true;
   }

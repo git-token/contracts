@@ -26,9 +26,21 @@ function initContract() {
 contract('GitToken', function(accounts) {
   describe('GitToken::executeBid', function() {
 
-    it("Should create a reserved supply of tokens, initialize a new auction, and seal the auction with a weighted average price, and execute a bid at the weighted average price.", function() {
+    it("Should create a reserved supply of tokens, initialize a new auction, and execute a bid.", function() {
       var gittoken;
       var auctionRound;
+      var endDate;
+      var tokensOffered;
+      var initialExRate;
+      var fundLimit;
+      var fundsCollected;
+
+      var exRate;
+      var wtdAvgExRate;
+      var tokensTransferred;
+      var etherPaid;
+      var refundAmount;
+
       return initContract().then((contract) => {
         gittoken = contract
 
@@ -38,218 +50,72 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "ContributorVerified", "Expected a `ContributorVerified` event")
 
-        return gittoken.rewardContributor(username, "organization", "member_added", 0, "00000000-0000-0000-0000-000000000000")
+        return gittoken.rewardContributor(username, "milestone", "closed", 0, "00000000-0000-0000-0000-000000000000")
       }).then(function(event){
         const { logs } = event
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 1, true)
+        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 1, 20, true)
       }).then(function(event){
         const { logs } = event
 
-        // console.log(logs[0]['args'])
 
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "NewAuction", "Expected a `NewAuction` event")
-        assert.equal(logs[0]['args']['auctionRound'], 1, "Expected Auction Round to be 1")
+        auctionRound  = logs[0]['args']['auctionDetails'][0]
+        endDate       = logs[0]['args']['auctionDetails'][2]
+        tokensOffered = logs[0]['args']['auctionDetails'][4]
+        initialExRate = logs[0]['args']['auctionDetails'][5]
+        fundLimit     = logs[0]['args']['auctionDetails'][6]
 
-        auctionRound = logs[0]['args']['auctionRound']
 
-        return gittoken.rewardContributor(username, "organization", "member_added", 0, "00000000-0000-0000-0000-000000000001")
-      }).then(function(event){
-        const { logs } = event
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
+        assert.equal(8, logs[0]['args']['auctionDetails'].length, "Expected the length of auctionDetails to be 9")
+        assert.equal(fundLimit, tokensOffered * (1e18 / initialExRate), "Expected the fund limit to equal tokensOffered * (1e18 / initialExRate)")
+        assert.equal(logs.length, 1, "Expected a logged event")
+        assert.equal(logs[0]['event'], "Auction", "Expected a `Auction` event")
+        assert.equal(auctionRound, 1, "Expected Auction Round to be 1")
 
-        return gittoken.sealAuction(auctionRound, 7230 * Math.pow(10, decimals));
+        return Promise.delay(3000)
+      }).then(function() {
+
+        return gittoken.executeBid(auctionRound.toNumber(), 5000 * Math.pow(10, decimals), {
+          from: accounts[1],
+          value: 1e18,
+          gasPrice: 1e9
+        })
+
       }).then(function(event) {
-        // console.log(event)
         const { logs } = event
-        // console.log(logs[0]['args'])
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "SealAuction", "Expected a `SealAuction` event")
 
-        return gittoken.executeBid(auctionRound, { from: accounts[1], value: 50e18 })
-      }).then(function(event) {
-        // console.log(event)
-        const { logs } = event
-        // console.log(logs[0]['args'])
-        assert.equal(logs.length, 2, "Expect two logged events")
-        assert.equal(logs[0]['event'], "Transfer", "Expected a `Transfer` event")
-        assert.equal(logs[1]['event'], "AuctionResults", "Expected a `AuctionResults` event")
+        auctionRound      = logs[0]['args']['bidDetails'][0]
+        exRate            = logs[0]['args']['bidDetails'][1]
+        wtdAvgExRate      = logs[0]['args']['bidDetails'][2]
+        tokensTransferred = logs[0]['args']['bidDetails'][3]
+        etherPaid         = logs[0]['args']['bidDetails'][4]
+        refundAmount      = logs[0]['args']['bidDetails'][5]
+        fundsCollected    = logs[0]['args']['bidDetails'][6]
+        fundLimit         = logs[0]['args']['bidDetails'][7]
+        date              = logs[0]['args']['bidDetails'][8]
+
+        assert.equal(9, logs[0]['args']['bidDetails'].length, "Expected the length of bidDetails to be 9")
+        assert.equal(logs.length, 1, "Expected a logged event")
+        assert.equal(logs[0]['event'], "AuctionBid", "Expected a `AuctionBid` event")
+        assert.equal(fundsCollected, 4e17, "Expected funds collected to be equal to 0.4 ETH")
+        assert.isAtLeast(date, endDate.toNumber(), "Expected bid date to be greater than or equal to the end date")
 
         return gittoken.balanceOf(accounts[1])
       }).then(function(balance) {
-        assert.isAtLeast(balance.toNumber(), 15000 * Math.pow(10, decimals), "Expected the balance of the user to be 15000 * Math.pow(10, decimals)")
+        assert.equal(balance, tokensTransferred.toNumber(), `Expected the ${balance} of the user to be ${tokensTransferred}`)
 
         return web3.eth.getBalance(gittoken.address)
       }).then(function(balance) {
 
-        var fundLimit = ((15000 * Math.pow(10, decimals)) * (1e18 / (7230 * Math.pow(10, decimals))) / 1e18).toFixed(3)
-        var fundsCollected = (parseInt(balance.toString()) / 1e18).toFixed(3)
-        assert.isAtLeast(fundsCollected, fundLimit, `Expected the funds collected ${fundsCollected} to at least equal the fund limit, ${fundLimit}.`)
+        assert.equal(balance, fundsCollected, `Expected the ${balance} of the contract to be ${fundsCollected}`)
+
 
       }).catch(function(error) {
         assert.equal(error, null, error.message)
       })
     }).timeout(20000);
-
-    it("Should execute a bid and not reach the funding limit; Does not issue an AuctionResults event", function() {
-      var gittoken;
-      var auctionRound;
-      return initContract().then((contract) => {
-        gittoken = contract
-
-        return gittoken.verifyContributor(contributorAddress, username)
-      }).then(function(event) {
-        const { logs } = event
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "ContributorVerified", "Expected a `ContributorVerified` event")
-
-        return gittoken.rewardContributor(username, "organization", "member_added", 0, "00000000-0000-0000-0000-000000000000")
-      }).then(function(event){
-        const { logs } = event
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
-
-        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 1, true)
-      }).then(function(event){
-        const { logs } = event
-
-        // console.log(logs[0]['args'])
-
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "NewAuction", "Expected a `NewAuction` event")
-        assert.equal(logs[0]['args']['auctionRound'], 1, "Expected Auction Round to be 1")
-
-        auctionRound = logs[0]['args']['auctionRound']
-
-        return gittoken.rewardContributor(username, "organization", "member_added", 0, "00000000-0000-0000-0000-000000000001")
-      }).then(function(event){
-        const { logs } = event
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
-
-        return gittoken.sealAuction(auctionRound, 7230 * Math.pow(10, decimals));
-      }).then(function(event) {
-        // console.log(event)
-        const { logs } = event
-        // console.log(logs[0]['args'])
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "SealAuction", "Expected a `SealAuction` event")
-
-        return gittoken.executeBid(auctionRound, { from: accounts[1], value: 1e18 })
-      }).then(function(event) {
-        // console.log(event)
-        const { logs } = event
-        // console.log(logs[0]['args'])
-        assert.equal(logs.length, 1, "Expect two logged events")
-        assert.equal(logs[0]['event'], "Transfer", "Expected a `Transfer` event")
-
-        return gittoken.balanceOf(accounts[1])
-      }).then(function(balance) {
-        assert.isAtLeast(balance.toNumber(), 7230 * Math.pow(10, decimals), "Expected the balance of the user to be 15000 * Math.pow(10, decimals)")
-
-        return web3.eth.getBalance(gittoken.address)
-      }).then(function(balance) {
-
-        var fundLimit = ((15000 * Math.pow(10, decimals)) * (1e18 / (7230 * Math.pow(10, decimals))) / 1e18).toFixed(3)
-        var fundsCollected = (parseInt(balance.toString()) / 1e18).toFixed(3)
-        assert.isBelow(fundsCollected, fundLimit, `Expected the funds collected ${fundsCollected} to be less than the fund limit, ${fundLimit}.`)
-
-      }).catch(function(error) {
-        assert.equal(error, null, error.message)
-      })
-    }).timeout(20000)
-
-    it("Should execute a bids until the auction is complete and emit an AuctionResults event", function() {
-      var gittoken;
-      var auctionRound;
-      return initContract().then((contract) => {
-        gittoken = contract
-
-        return gittoken.verifyContributor(contributorAddress, username)
-      }).then(function(event) {
-        const { logs } = event
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "ContributorVerified", "Expected a `ContributorVerified` event")
-
-        return gittoken.rewardContributor(username, "organization", "member_added", 0, "00000000-0000-0000-0000-000000000000")
-      }).then(function(event){
-        const { logs } = event
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
-
-        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 1, true)
-      }).then(function(event){
-        const { logs } = event
-
-        // console.log(logs[0]['args'])
-
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "NewAuction", "Expected a `NewAuction` event")
-        assert.equal(logs[0]['args']['auctionRound'], 1, "Expected Auction Round to be 1")
-
-        auctionRound = logs[0]['args']['auctionRound']
-
-        return gittoken.rewardContributor(username, "organization", "member_added", 0, "00000000-0000-0000-0000-000000000001")
-      }).then(function(event){
-        const { logs } = event
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
-
-        return gittoken.sealAuction(auctionRound, 7230 * Math.pow(10, decimals));
-      }).then(function(event) {
-        // console.log(event)
-        const { logs } = event
-        // console.log(logs[0]['args'])
-        assert.equal(logs.length, 1, "Expect a logged event")
-        assert.equal(logs[0]['event'], "SealAuction", "Expected a `SealAuction` event")
-
-        return gittoken.executeBid(auctionRound, { from: accounts[1], value: 1e18 })
-      }).then(function(event) {
-        // console.log(event)
-        const { logs } = event
-        // console.log(logs[0]['args'])
-        assert.equal(logs.length, 1, "Expect two logged events")
-        assert.equal(logs[0]['event'], "Transfer", "Expected a `Transfer` event")
-
-        return gittoken.balanceOf(accounts[1])
-      }).then(function(balance) {
-        assert.isAtLeast(balance.toNumber(), 7230 * Math.pow(10, decimals), "Expected the balance of the user to be 15000 * Math.pow(10, decimals)")
-
-        return web3.eth.getBalance(gittoken.address)
-      }).then(function(balance) {
-
-        var fundLimit = ((15000 * Math.pow(10, decimals)) * (1e18 / (7230 * Math.pow(10, decimals))) / 1e18).toFixed(3)
-        var fundsCollected = (parseInt(balance.toString()) / 1e18).toFixed(3)
-        assert.isBelow(fundsCollected, fundLimit, `Expected the funds collected ${fundsCollected} to be less than the fund limit, ${fundLimit}.`)
-
-        return gittoken.executeBid(auctionRound, { from: accounts[1], value: 5e18 })
-      }).then(function(event) {
-        // console.log(event)
-        const { logs } = event
-        // console.log(logs[0]['args'])
-        assert.equal(logs.length, 2, "Expect two logged events")
-        assert.equal(logs[0]['event'], "Transfer", "Expected a `Transfer` event")
-        assert.equal(logs[1]['event'], "AuctionResults", "Expected a `AuctionResults` event")
-
-        return gittoken.balanceOf(accounts[1])
-      }).then(function(balance) {
-        assert.isAtLeast(balance.toNumber(), 2 * 7230 * Math.pow(10, decimals), "Expected the balance of the user to be 15000 * Math.pow(10, decimals)")
-
-        return web3.eth.getBalance(gittoken.address)
-      }).then(function(balance) {
-
-        var fundLimit = ((15000 * Math.pow(10, decimals)) * (1e18 / (7230 * Math.pow(10, decimals))) / 1e18).toFixed(5)
-        var fundsCollected = (parseInt(balance.toString()) / 1e18).toFixed(5)
-        assert.equal(fundsCollected, fundLimit, `Expected the funds collected ${fundsCollected} is greater than or equal to the fund limit, ${fundLimit}.`)
-
-      }).catch(function(error) {
-        assert.equal(error, null, error.message)
-      })
-    }).timeout(20000)
 
   })
 })
