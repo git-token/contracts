@@ -293,7 +293,8 @@ library GitTokenLib {
     uint _auctionRound,
     uint _exRate
   ) internal returns (uint[9] bidData) {
-    require(self.auctionDetails[_auctionRound].endDate <= now);
+    require(self.auctionDetails[_auctionRound].startDate <= now);
+    require(self.auctionDetails[_auctionRound].endDate >= now);
     require(self.auctionDetails[_auctionRound].finalized == false);
     require(self.auctionDetails[_auctionRound].fundLimit > 0);
     require(msg.value > 0);
