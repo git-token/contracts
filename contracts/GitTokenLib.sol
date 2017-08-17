@@ -332,7 +332,7 @@ library GitTokenLib {
       self.auctionDetails[self.auctionRound].tokensOffered.sub(_adjTokens);
 
     self.auctionDetails[_auctionRound].fundLimit =
-      self.auctionDetails[_auctionRound].fundLimit.sub(msg.value.sub(_ethPaid));
+      self.auctionDetails[_auctionRound].fundLimit.sub(_ethPaid);
 
     if (self.auctionDetails[_auctionRound].fundsCollected >= self.auctionDetails[_auctionRound].fundLimit) {
       self.auctionDetails[_auctionRound].finalized = true;
