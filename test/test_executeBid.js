@@ -29,6 +29,7 @@ contract('GitToken', function(accounts) {
     it("Should create a reserved supply of tokens, initialize a new auction, and execute a bid.", function() {
       var gittoken;
       var auctionRound;
+      var startDate;
       var endDate;
       var tokensOffered;
       var initialExRate;
@@ -56,12 +57,13 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 1, 20, true)
+        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 2, 20, true)
       }).then(function(event){
         const { logs } = event
 
 
         auctionRound  = logs[0]['args']['auctionDetails'][0]
+        startDate     = logs[0]['args']['auctionDetails'][1]
         endDate       = logs[0]['args']['auctionDetails'][2]
         tokensOffered = logs[0]['args']['auctionDetails'][4]
         initialExRate = logs[0]['args']['auctionDetails'][5]
@@ -74,9 +76,10 @@ contract('GitToken', function(accounts) {
         assert.equal(logs[0]['event'], "Auction", "Expected a `Auction` event")
         assert.equal(auctionRound, 1, "Expected Auction Round to be 1")
 
-        return Promise.delay(3000)
-      }).then(function() {
+        let delay = new Date(startDate * 1000).getTime() - new Date().getTime()
 
+        return Promise.delay(delay)
+      }).then(() => {
         return gittoken.executeBid(auctionRound.toNumber(), 5000 * Math.pow(10, decimals), {
           from: accounts[1],
           value: 1e18,
@@ -100,7 +103,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expected a logged event")
         assert.equal(logs[0]['event'], "AuctionBid", "Expected a `AuctionBid` event")
         assert.equal(fundsCollected, 4e17, "Expected funds collected to be equal to 0.4 ETH")
-        assert.isAtLeast(date, endDate.toNumber(), "Expected bid date to be greater than or equal to the end date")
+        assert.isAtLeast(date.toNumber(), startDate.toNumber(), "Expected bid date to be greater than or equal to the start date")
 
         return gittoken.balanceOf(accounts[1])
       }).then(function(balance) {
@@ -111,6 +114,12 @@ contract('GitToken', function(accounts) {
 
         assert.equal(balance, fundsCollected, `Expected the ${balance} of the contract to be ${fundsCollected}`)
 
+        return gittoken.getAuctionDetails(auctionRound.toNumber())
+      }).then((auctionDetails) => {
+
+        assert.equal(wtdAvgExRate, auctionDetails[0][6].toNumber(), "Expected wtdAvgExRate to equal auction details value");
+        assert.equal(fundsCollected, auctionDetails[0][7].toNumber(), "Expected funds collected to equal auction details value");
+        assert.equal(fundLimit, auctionDetails[0][8].toNumber(), "Expected fund limit to equal auction details value");
 
       }).catch(function(error) {
         assert.equal(error, null, error.message)

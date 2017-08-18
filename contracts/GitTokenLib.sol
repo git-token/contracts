@@ -43,7 +43,6 @@ library GitTokenLib {
     uint fundLimit;
     uint numBids;
     uint tokenLimitFactor;
-    bool finalized;
     uint[] ethValues;
     uint[] exRateValues;
   }
@@ -254,7 +253,7 @@ library GitTokenLib {
 
       /*uint delay = _delay > 60*60*24 ? _delay : 60*60*24*3;*/
       uint delay = _delay > 0 ? _delay : 60*60*24*3;
-
+      self.auctionDetails[self.auctionRound].round            = self.auctionRound;
       self.auctionDetails[self.auctionRound].startDate        = now.add(delay);
       self.auctionDetails[self.auctionRound].endDate          = self.auctionDetails[self.auctionRound].startDate.add(delay);
       self.auctionDetails[self.auctionRound].tokensOffered    = self.balances[address(this)];
@@ -264,7 +263,6 @@ library GitTokenLib {
       self.auctionDetails[self.auctionRound].fundLimit        = self.balances[address(this)] * (10**18 / _initialPrice);
       self.auctionDetails[self.auctionRound].numBids          = 0;
       self.auctionDetails[self.auctionRound].tokenLimitFactor = _tokenLimitFactor;
-      self.auctionDetails[self.auctionRound].finalized        = false;
 
       _lockTokens == true ?
         self.lockTokenTransfersUntil = self.auctionDetails[self.auctionRound].endDate.add(delay) :
@@ -295,7 +293,7 @@ library GitTokenLib {
   ) internal returns (uint[9] bidData) {
     require(self.auctionDetails[_auctionRound].startDate <= now);
     require(self.auctionDetails[_auctionRound].endDate >= now);
-    require(self.auctionDetails[_auctionRound].finalized == false);
+    require(self.auctionDetails[_auctionRound].fundsCollected <= self.auctionDetails[_auctionRound].fundLimit);
     require(self.auctionDetails[_auctionRound].fundLimit > 0);
     require(msg.value > 0);
 
@@ -326,18 +324,20 @@ library GitTokenLib {
     self.auctionDetails[self.auctionRound].fundsCollected =
       self.auctionDetails[self.auctionRound].fundsCollected.add(_ethPaid);
 
+    self.auctionDetails[_auctionRound].fundLimit =
+      self.auctionDetails[_auctionRound].fundLimit.sub(_ethPaid);
+
     self.balances[address(this)] = self.balances[address(this)].sub(_adjTokens);
     self.balances[msg.sender] = self.balances[msg.sender].add(_adjTokens);
 
     self.auctionDetails[self.auctionRound].tokensOffered =
       self.auctionDetails[self.auctionRound].tokensOffered.sub(_adjTokens);
 
-    self.auctionDetails[_auctionRound].fundLimit =
-      self.auctionDetails[_auctionRound].fundLimit.sub(_ethPaid);
 
-    if (self.auctionDetails[_auctionRound].fundsCollected >= self.auctionDetails[_auctionRound].fundLimit) {
-      self.auctionDetails[_auctionRound].finalized = true;
-    }
+
+    self.auctionDetails[_auctionRound].numBids =
+      self.auctionDetails[_auctionRound].numBids.add(1);
+
 
     return ([
       _auctionRound,

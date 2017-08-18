@@ -224,7 +224,7 @@ contract GitToken is Ownable {
    * NOTE: This value is used to make GitHub API calls; it must be associated with
    * the GitHub organization the web hook has been configured for.
    */
-  function organization() public returns (string _organization) {
+  function organization() constant returns (string _organization) {
     return gittoken.organization;
   }
 
@@ -232,7 +232,7 @@ contract GitToken is Ownable {
    * @dev Returns the string of the token contract name
    * @return _name string Name of the token contract
    */
-  function name() public returns (string _name) {
+  function name() constant returns (string _name) {
     return gittoken.name;
   }
 
@@ -240,7 +240,7 @@ contract GitToken is Ownable {
    * @dev Returns the string of the token contract symbol
    * @return _symbol string Symbol of the token contract
    */
-  function symbol() public returns (string _symbol) {
+  function symbol() constant returns (string _symbol) {
     return gittoken.symbol;
   }
 
@@ -444,6 +444,25 @@ contract GitToken is Ownable {
   ) payable public returns (bool) {
     AuctionBid(gittoken._executeBid(_auctionRound, _exchangeRate));
     return true;
+  }
+
+  function getAuctionDetails(uint auctionRound) constant returns(uint[11], uint[], uint[]) {
+    return ([
+        gittoken.auctionDetails[auctionRound].round,
+        gittoken.auctionDetails[auctionRound].startDate,
+        gittoken.auctionDetails[auctionRound].endDate,
+        gittoken.auctionDetails[auctionRound].lockDate,
+        gittoken.auctionDetails[auctionRound].tokensOffered,
+        gittoken.auctionDetails[auctionRound].initialPrice,
+        gittoken.auctionDetails[auctionRound].wtdAvgExRate,
+        gittoken.auctionDetails[auctionRound].fundsCollected,
+        gittoken.auctionDetails[auctionRound].fundLimit,
+        gittoken.auctionDetails[auctionRound].numBids,
+        gittoken.auctionDetails[auctionRound].tokenLimitFactor
+      ],
+        gittoken.auctionDetails[auctionRound].ethValues,
+        gittoken.auctionDetails[auctionRound].exRateValues
+      );
   }
 
 
