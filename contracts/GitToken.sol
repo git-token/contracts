@@ -116,10 +116,6 @@ contract GitToken is Ownable {
     gittoken.decimals = _decimals;
 
 
-    gittoken.reservedValues['milestone']['created']           = 0 * 10**_decimals;
-
-    gittoken.reservedValues['milestone']['closed']            = 40000 * 10**_decimals;
-
     // Anytime a new member is invited to an organization
     gittoken.reservedValues['organization']['member_invited'] = 0 * 10**_decimals;
     // Anytime a new member is added to an organization
@@ -197,6 +193,8 @@ contract GitToken is Ownable {
     gittoken.rewardValues['team_add']                         = 2000 * 10**_decimals;
     // Any time a User stars a Repository.
     gittoken.rewardValues['watch']                            = 100 * 10**_decimals;
+
+    gittoken.reservedValues['milestone']['closed']            = 40000 * 10**_decimals;
 
   }
 

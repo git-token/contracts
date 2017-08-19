@@ -158,32 +158,29 @@ library GitTokenLib {
     address _contributor = self.contributorAddresses[_username];
 
     // If no value is created, then throw the transaction;
-    if(_value == 0 && _reservedValue == 0){
-      throw;
-      // If the GitHub web hook event ID has already occured, then throw the transaction;
-    } else if(self.receivedDelivery[_deliveryID] == true) {
-      throw;
+    require(_value > 0 || _reservedValue > 0);
+
+    // If the GitHub web hook event ID has already occured, then throw the transaction;
+    require(self.receivedDelivery[_deliveryID] == false);
+    // Update totalSupply with the added values created, including the reserved supply for auction;
+    self.totalSupply = self.totalSupply.add(_value).add(_reservedValue);
+
+    // Add to the balance of reserved tokens held for auction by the contract
+    self.balances[address(this)] = self.balances[address(this)].add(_reservedValue);
+
+    // If the contributor is not yet verified, increase the unclaimed rewards for the user until the user verifies herself/himself;
+    if (_contributor == 0x0){
+      self.unclaimedRewards[_username] = self.unclaimedRewards[_username].add(_value);
     } else {
-      // Update totalSupply with the added values created, including the reserved supply for auction;
-      self.totalSupply = self.totalSupply.add(_value).add(_reservedValue);
-
-      // Add to the balance of reserved tokens held for auction by the contract
-      self.balances[address(this)] = self.balances[address(this)].add(_reservedValue);
-
-      // If the contributor is not yet verified, increase the unclaimed rewards for the user until the user verifies herself/himself;
-      if (_contributor == 0x0){
-        self.unclaimedRewards[_username] = self.unclaimedRewards[_username].add(_value);
-      } else {
-        // If the contributor's address is set, update the contributor's balance;
-        self.balances[_contributor] = self.balances[_contributor].add(_value);
-      }
-
-      // Set the received deliveries for this event to true to prevent/mitigate event replay attacks;
-      self.receivedDelivery[_deliveryID] = true;
-
-      // Return true to parent contract
-      return true;
+      // If the contributor's address is set, update the contributor's balance;
+      self.balances[_contributor] = self.balances[_contributor].add(_value);
     }
+
+    // Set the received deliveries for this event to true to prevent/mitigate event replay attacks;
+    self.receivedDelivery[_deliveryID] = true;
+
+    // Return true to parent contract
+    return true;
   }
 
   /**
@@ -293,7 +290,6 @@ library GitTokenLib {
   ) internal returns (uint[9] bidData) {
     require(self.auctionDetails[_auctionRound].startDate <= now);
     require(self.auctionDetails[_auctionRound].endDate >= now);
-    require(self.auctionDetails[_auctionRound].fundsCollected <= self.auctionDetails[_auctionRound].fundLimit);
     require(self.auctionDetails[_auctionRound].fundLimit > 0);
     require(msg.value > 0);
 
@@ -332,8 +328,6 @@ library GitTokenLib {
 
     self.auctionDetails[self.auctionRound].tokensOffered =
       self.auctionDetails[self.auctionRound].tokensOffered.sub(_adjTokens);
-
-
 
     self.auctionDetails[_auctionRound].numBids =
       self.auctionDetails[_auctionRound].numBids.add(1);
