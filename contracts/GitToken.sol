@@ -444,6 +444,10 @@ contract GitToken is Ownable {
     return true;
   }
 
+  function getAuctionRound() constant returns (uint) {
+    return gittoken.auctionRound;
+  }
+
   function getAuctionDetails(uint auctionRound) constant returns(uint[11], uint[], uint[]) {
     return ([
         gittoken.auctionDetails[auctionRound].round,
