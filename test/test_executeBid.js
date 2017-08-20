@@ -57,7 +57,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Contribution", "Expected a `Contribution` event")
 
-        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 2, 20, true)
+        return gittoken.initializeAuction(5000 * Math.pow(10, decimals), 1, 20, true)
       }).then(function(event){
         const { logs } = event
 
@@ -77,14 +77,11 @@ contract('GitToken', function(accounts) {
         assert.equal(auctionRound, 1, "Expected Auction Round to be 1")
 
         let delay = new Date(startDate * 1000).getTime() - new Date().getTime()
-
-        return Promise.delay(delay)
-      }).then(() => {
-        return gittoken.executeBid(auctionRound.toNumber(), 5000 * Math.pow(10, decimals), {
+        return Promise.delay(delay, gittoken.executeBid(auctionRound.toNumber(), 5000 * Math.pow(10, decimals), {
           from: accounts[1],
           value: 1e18,
           gasPrice: 1e9
-        })
+        }))
 
       }).then(function(event) {
         const { logs } = event

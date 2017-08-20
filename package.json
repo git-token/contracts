@@ -1,10 +1,10 @@
 {
   "name": "gittoken-contracts",
-  "version": "0.0.35",
+  "version": "0.0.36",
   "description": "GitToken Solidity Smart Contracts",
   "main": "",
   "scripts": {
-    "test": "mocha",
+    "test": "truffle test",
     "build": "truffle build",
     "deploy": "rm -rf ./build/* && truffle migrate --reset"
   },
