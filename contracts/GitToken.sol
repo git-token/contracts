@@ -60,8 +60,17 @@ contract GitToken is Ownable {
    * @param reservedValue uint    Number of tokens created and reserved for auction,
    * @param date          uint    Unix timestamp of when the contributor was rewarded,
    * @param rewardType    string  GitHub web hook event type (e.g. push, pull_request)
+   * @param reservedType  string  GitHub web hook event subtype (e.g. milestone => closed)
    */
-  event Contribution(address indexed contributor, string username, uint value, uint reservedValue, uint date, string rewardType);
+  event Contribution(
+    address indexed contributor,
+    string username,
+    uint value,
+    uint reservedValue,
+    uint date,
+    string rewardType,
+    string reservedType
+  );
 
   /**
    * ContributionVerified Event | Emitted when a user verifies themselves on the UI using GitHub OAuth
@@ -412,7 +421,8 @@ contract GitToken is Ownable {
       gittoken.rewardValues[_rewardType].add(_rewardBonus),
       gittoken.reservedValues[_rewardType][_reservedType],
       now,
-      _rewardType
+      _rewardType,
+      _reservedType
     );
 
     return true;
