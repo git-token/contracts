@@ -78,7 +78,7 @@ contract('GitToken', function(accounts) {
 
         let delay = new Date(startDate * 1000).getTime() - new Date().getTime()
         return Promise.delay(delay, gittoken.executeBid(auctionRound.toNumber(), 5000 * Math.pow(10, decimals), {
-          from: accounts[1],
+          from: accounts[0],
           value: 1e18,
           gasPrice: 1e9
         }))
@@ -102,7 +102,7 @@ contract('GitToken', function(accounts) {
         assert.equal(fundsCollected, 4e17, "Expected funds collected to be equal to 0.4 ETH")
         assert.isAtLeast(date.toNumber(), startDate.toNumber(), "Expected bid date to be greater than or equal to the start date")
 
-        return gittoken.balanceOf(accounts[1])
+        return gittoken.balanceOf(accounts[0])
       }).then(function(balance) {
         assert.equal(balance, tokensTransferred.toNumber(), `Expected the ${balance} of the user to be ${tokensTransferred}`)
 

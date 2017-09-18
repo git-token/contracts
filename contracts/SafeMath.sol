@@ -71,10 +71,4 @@ library SafeMath {
       assert(m > 0);
       return m;
   }
-
-  function assert(bool assertion) internal {
-    if (!assertion) {
-      throw;
-    }
-  }
 }
