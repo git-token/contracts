@@ -56,20 +56,19 @@ contract GitToken is Ownable {
    * Contribution Event | Emitted when a GitHub contribution is broadcasted by web hook,
    * @param contributor   address Ethereum address of contributor,
    * @param username      string  GitHub username of contributor,
-   * @param value         uint    Number of tokens created and distributed to contributor,
+   * @param rewardType    string  GitHub web hook event type (e.g. push, pull_request)
+   * @param rewardValue   uint    Number of tokens created and distributed to contributor,
    * @param reservedValue uint    Number of tokens created and reserved for auction,
    * @param date          uint    Unix timestamp of when the contributor was rewarded,
-   * @param rewardType    string  GitHub web hook event type (e.g. push, pull_request)
-   * @param reservedType  string  GitHub web hook event subtype (e.g. milestone => closed)
+
    */
   event Contribution(
     address indexed contributor,
     string username,
-    uint value,
-    uint reservedValue,
-    uint date,
     string rewardType,
-    string reservedType
+    uint rewardValue,
+    uint reservedValue,
+    uint date
   );
 
   /**
@@ -80,33 +79,24 @@ contract GitToken is Ownable {
    */
   event ContributorVerified(address indexed contributor, string username, uint date);
 
-  /**
-   * RewardValueSet Event | Emitted when the reward and reserved type values are changed
-   * @param rewardType   string GitHub web hook event type,
-   * @param reservedType string GitHub web hook action type (a subtype of rewardType; e.g. `organization` -> `member_added`),
-   * @param value        uint   Updated value of reward or reserved Type
-   * @param date         uint   Unix timestamp when reward values are reset
-   * NOTE: This event is used by `setRewardValue()` and `setReservedValue()` methods
-   */
-  event RewardValueSet(string rewardType, string reservedType, uint value, uint date);
-
-
+  /* NOTE: Consider removing */
   event Auction(uint[8] auctionDetails);
   event AuctionBid(uint[9] bidDetails);
+
 
   /**
    * @dev Constructor method for GitToken Contract,
    * @param _contributor  address Ethereum Address of the primary contributor or organization owner,
-   * @param _name         string  Name of the GitToken contract (name of organization),
    * @param _username     string  GitHub username of the primary contributor or organization owner,
+   * @param _name         string  Name of the GitToken contract (name of organization),
    * @param _organization string  GitHub Organization as it appears in the GitHub organization URL (e.g. https://GitHub.com/git-token),
    * @param _symbol       string  Symbol of the GitToken contract,
    * @param _decimals     uint    Number of decimal representation for token balances;
    */
   function GitToken(
     address _contributor,
-    string _name,
     string _username,
+    string _name,
     string _organization,
     string _symbol,
     uint _decimals
@@ -123,87 +113,6 @@ contract GitToken is Ownable {
     gittoken.organization = _organization;
     gittoken.symbol = _symbol;
     gittoken.decimals = _decimals;
-
-
-    // Anytime a new member is invited to an organization
-    gittoken.reservedValues['organization']['member_invited'] = 0 * 10**_decimals;
-    // Anytime a new member is added to an organization
-    gittoken.reservedValues['organization']['member_added']   = 15000 * 10**_decimals;
-    // Use when setting up the webhook for github
-    gittoken.rewardValues['ping']                             = 2500 * 10**_decimals;
-    // Any time a Commit is commented on.
-    gittoken.rewardValues['commit_comment']                   = 250 * 10**_decimals;
-
-     // Any time a Branch or Tag is created.
-    gittoken.rewardValues['create']                           = 2500 * 10**_decimals;
-    // Any time a Branch or Tag is deleted.
-    gittoken.rewardValues['delete']                           = 0 * 10**_decimals;
-
-     // Any time a Repository has a new deployment created from the API.
-    gittoken.rewardValues['deployment']                       = 5000 * 10**_decimals;
-    // Any time a deployment for a Repository has a status update
-    gittoken.rewardValues['deployment_status']                = 100 * 10**_decimals;
-    // Any time a Repository is forked.
-    gittoken.rewardValues['fork']                             = 5000 * 10**_decimals;
-
-     // Any time a Wiki page is updated.
-    gittoken.rewardValues['gollum']                           = 100 * 10**_decimals;
-    // Any time a GitHub App is installed or uninstalled.
-    gittoken.rewardValues['installation']                     = 250 * 10**_decimals;
-    // Any time a repository is added or removed from an organization (? check this)
-    gittoken.rewardValues['installation_repositories']        = 1000 * 10**_decimals;
-
-     // Any time a comment on an issue is created, edited, or deleted.
-    gittoken.rewardValues['issue_comment']                    = 250 * 10**_decimals;
-    // Any time an Issue is assigned, unassigned, labeled, unlabeled, opened, edited,
-    gittoken.rewardValues['issues']                           = 500 * 10**_decimals;
-    // Any time a Label is created, edited, or deleted.
-    gittoken.rewardValues['label']                            = 100 * 10**_decimals;
-    // Any time a user purchases, cancels, or changes their GitHub
-    gittoken.rewardValues['marketplace_purchases']            = 0 * 10**_decimals;
-    // Any time a User is added or removed as a collaborator to a Repository, or has
-    gittoken.rewardValues['member']                           = 1000 * 10**_decimals;
-    // Any time a User is added or removed from a team. Organization hooks only.
-    gittoken.rewardValues['membership']                       = 1000 * 10**_decimals;
-    // Any time a Milestone is created, closed, opened, edited, or deleted.
-    gittoken.rewardValues['milestone']                        = 250 * 10**_decimals;
-    // Any time a user is added, removed, or invited to an Organization.
-    gittoken.rewardValues['organization']                     = 1000 * 10**_decimals;
-    // Any time an organization blocks or unblocks a user. Organization hooks only.
-    gittoken.rewardValues['org_block']                        = 0 * 10**_decimals;
-
-     // Any time a Pages site is built or results in a failed build.
-    gittoken.rewardValues['page_build']                       = 500 * 10**_decimals;
-    // Any time a Project Card is created, edited, moved, converted to an issue,
-    gittoken.rewardValues['project_card']                     = 250 * 10**_decimals;
-    // Any time a Project Column is created, edited, moved, or deleted.
-    gittoken.rewardValues['project_column']                   = 50 * 10**_decimals;
-    // Any time a Project is created, edited, closed, reopened, or deleted.
-    gittoken.rewardValues['project']                          = 1000 * 10**_decimals;
-    // Any time a Repository changes from private to public.
-    gittoken.rewardValues['public']                           = 10000 * 10**_decimals;
-    // Any time a comment on a pull request's unified diff is created, edited, or deleted (in the Files Changed tab).
-    gittoken.rewardValues['pull_request_review_comment']      = 250 * 10**_decimals;
-    // Any time a pull request review is submitted, edited, or dismissed.
-    gittoken.rewardValues['pull_request_review']              = 250 * 10**_decimals;
-    // Any time a pull request is assigned, unassigned, labeled, unlabeled, opened, edited, closed, reopened, or synchronized (updated due to a new push in the branch that the pull request is tracking). Also any time a pull request review is requested, or a review request is removed.
-    gittoken.rewardValues['pull_request']                     = 2500 * 10**_decimals;
-    // Any Git push to a Repository, including editing tags or branches. Commits via API actions that update references are also counted. This is the default event.
-    gittoken.rewardValues['push']                             = 1000 * 10**_decimals;
-    // Any time a Repository is created, deleted (organization hooks only), made public, or made private.
-    gittoken.rewardValues['repository']                       = 2500 * 10**_decimals;
-    // Any time a Release is published in a Repository.
-    gittoken.rewardValues['release']                          = 5000 * 10**_decimals;
-    // Any time a Repository has a status update from the API
-    gittoken.rewardValues['status']                           = 200 * 10**_decimals;
-    // Any time a team is created, deleted, modified, or added to or removed from a repository. Organization hooks only
-    gittoken.rewardValues['team']                             = 2000 * 10**_decimals;
-    // Any time a team is added or modified on a Repository.
-    gittoken.rewardValues['team_add']                         = 2000 * 10**_decimals;
-    // Any time a User stars a Repository.
-    gittoken.rewardValues['watch']                            = 100 * 10**_decimals;
-
-    gittoken.reservedValues['milestone']['closed']            = 40000 * 10**_decimals;
 
   }
 
@@ -337,46 +246,6 @@ contract GitToken is Ownable {
 
 
   /**
-   * @dev Set the reward value for a GitHub web hook event
-   * @param _rewardValue uint256 Number of tokens to issue given a rewardType,
-   * @param _rewardType  string  GitHub web hook event,
-   * @return             bool    Returns boolean value if method is called;
-   */
-  function setRewardValue(
-    uint256 _rewardValue,
-    string _rewardType
-  )
-    onlyOwner
-    public
-    returns (bool)
-  {
-    gittoken.rewardValues[_rewardType] = _rewardValue;
-    RewardValueSet(_rewardType, '', _rewardValue, now);
-    return true;
-  }
-
-  /**
-   * @dev Set the reserved value for a GitHub web hook event subtype
-   * @param _reservedValue uint256 Number of tokens to issue given a reservedType,
-   * @param _rewardType    string  GitHub web hook event,
-   * @param _reservedType  string  GitHub web hook event subtype (action; e.g. `organization` -> `member_added`),
-   * @return               bool    Returns boolean value if method is called;
-   */
-  function setReservedValue(
-    uint256 _reservedValue,
-    string _rewardType,
-    string _reservedType
-  )
-    onlyOwner
-    public
-    returns (bool)
-  {
-    gittoken.reservedValues[_rewardType][_reservedType] = _reservedValue;
-    RewardValueSet(_rewardType, _reservedType, _reservedValue, now);
-    return true;
-  }
-
-  /**
    * @dev Verify contributor Ethereum address associated with GitHub username
    * @param  _contributor address Ethereum address of GitHub organization contributor,
    * @param  _username    string  GitHub username of contributor,
@@ -397,32 +266,31 @@ contract GitToken is Ownable {
 
   /**
    * @dev Reward contributor when a GitHub web hook event is received
-   * @param  _username     string GitHub username of contributor
-   * @param  _rewardType   string GitHub web hook event
-   * @param  _reservedType string GitHub web hook event subtype (action; e.g. `organization` -> `member_added`)
-   * @param  _rewardBonus  uint   Number of tokens to send to contributor as a bonus (used for off-chain calculated values)
-   * @param  _deliveryID   string GitHub delivery ID of web hook request
-   * @return               bool   Returns boolean value if method is called
+   * @param  _username      string GitHub username of contributor
+   * @param  _rewardType    string GitHub Event Reward Type
+   * @param  _rewardValue   uint   Number of tokens rewarded to contributor
+   * @param  _reservedValue uint   Number of tokens reserved for auction
+   * @param  _deliveryID    string GitHub delivery ID of web hook request
+   * @return                bool   Returns boolean value if method is called
    */
   function rewardContributor(
     string _username,
-    string _rewardType,
-    string _reservedType,
-    uint _rewardBonus,
+    string rewardType,
+    uint _rewardValue,
+    uint _reservedValue,
     string _deliveryID
   )
   onlyOwner
   public
   returns (bool) {
-    require(gittoken._rewardContributor(_username, _rewardType, _reservedType, _rewardBonus, _deliveryID));
+    require(gittoken._rewardContributor(_username, _rewardValue, _reservedValue, _deliveryID));
     Contribution(
       gittoken.contributorAddresses[_username],
       _username,
-      gittoken.rewardValues[_rewardType].add(_rewardBonus),
-      gittoken.reservedValues[_rewardType][_reservedType],
-      now,
       _rewardType,
-      _reservedType
+      _rewardValue,
+      _reservedValue,
+      now
     );
 
     return true;
