@@ -231,7 +231,7 @@ library GitTokenLib {
    * @param  _initialPrice uint Token/ETH Exchange Rate (#Tokens / 1 ETH)
    * @param  _delay        uint Time in milliseconds to delay each auction period (I - Pre, II - Start, III - End, IV - Post)
    * @param  _lockTokens   bool Boolean value to optionally lock all token transfers until the Post auction date.
-   * @return               bool Returns Boolean value when called from parent contract;
+   * @return               uint[8] AuctionData
    */
   function _initializeAuction(
     Data storage self,
