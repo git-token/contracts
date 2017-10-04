@@ -44,9 +44,31 @@ library SafeMath {
     return a < b ? a : b;
   }
 
-  function assert(bool assertion) internal {
-    if (!assertion) {
-      throw;
-    }
+  function sum(uint[] _values) internal constant returns (uint) {
+        assert(_values.length > 0);
+        uint s = 0;
+        for (uint i = 0; i < _values.length; i++) {
+            s = add(s, _values[i]);
+        }
+        assert(s > 0);
+        return s;
+   }
+
+  function wtdAvg(uint[] _weights, uint[] _values) internal constant returns (uint) {
+
+     assert(_values.length > 0);
+     assert(_weights.length > 0);
+
+     uint s = sum(_weights);
+     uint m = 0;
+
+     for (uint i = 0; i < _values.length; i++) {
+          uint w = _weights[i];
+          uint x = _values[i];
+          m = add(m, div(mul(w, x), s));
+      }
+
+      assert(m > 0);
+      return m;
   }
 }

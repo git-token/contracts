@@ -1,28 +1,16 @@
 const GitTokenLib = artifacts.require('./GitTokenLib.sol');
 const GitToken = artifacts.require('./GitToken.sol');
 
-const {
-  contributorAddress,
-  username,
-  name,
-  organization,
-  symbol,
-  decimals
-} = require('../gittoken.config')
-
 module.exports = function(deployer) {
   deployer.deploy(GitTokenLib);
   deployer.link(GitTokenLib, GitToken);
-  GitToken.new(
-    contributorAddress,
-    name,
-    username,
-    organization,
-    symbol,
-    decimals
-  ).then((instance) => {
-    console.log(`GitToken Contract Deployed at ${instance.address}`)
-  }).catch((error) => {
-    console.log('error', error)
-  });
+  deployer.deploy(
+    GitToken,
+    "0x8da299e2184ea12624cd588006e24a78f2f90594",
+    "GitToken",
+    "ryanmtate",
+    "git-token",
+    "GTK",
+    8
+  )
 };

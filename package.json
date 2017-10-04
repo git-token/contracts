@@ -1,10 +1,10 @@
 {
   "name": "gittoken-contracts",
-  "version": "0.0.17",
+  "version": "0.0.38",
   "description": "GitToken Solidity Smart Contracts",
   "main": "",
   "scripts": {
-    "test": "mocha",
+    "test": "truffle test",
     "build": "truffle build",
     "deploy": "rm -rf ./build/* && truffle migrate --reset"
   },
@@ -17,7 +17,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-runtime": "^6.23.0",
-    "chai": "^4.0.1"
+    "chai": "^4.1.1"
   },
   "keywords": [
     "GitToken",
@@ -28,5 +28,8 @@
   ],
   "author": "GitToken",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "web3": "^0.19.0"
+  }
 }
