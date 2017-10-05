@@ -10,6 +10,6 @@ ADD . .
 
 RUN npm install
 
-RUN node testrpc.js
+RUN node testrpc.js &
 
 ENTRYPOINT truffle test
