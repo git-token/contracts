@@ -111,7 +111,7 @@ contract('GitToken', function(accounts) {
         assert.equal(balance.toNumber(), toBigNumber(2500, decimals), "Expected balance to be 2500")
 
       }).catch(function(error) {
-        assert.equal(error, null, error.message)
+        assert.notEqual(error, null, error.message)
       })
     })
 
