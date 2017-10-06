@@ -80,8 +80,6 @@ library GitTokenLib {
     uint auctionRound;
     uint lockTokenTransfersUntil;
     mapping(uint => Auction) auctionDetails;
-    mapping(string => uint256) rewardValues;
-    mapping(string => mapping(string => uint256)) reservedValues;
     mapping(address => string) contributorUsernames;
     mapping(string => address) contributorAddresses;
     mapping(address => mapping(address => uint)) allowed;
@@ -133,47 +131,40 @@ library GitTokenLib {
   /**
    * @dev Internal rewardContributor method for GitToken contract rewardContributor method
    * @param  self   Data    Use the Data struct as the contract storage and reference
-   * @param  _username     string GitHub username of contributor
-   * @param  _rewardType   string GitHub web hook event
-   * @param  _reservedType string GitHub web hook event subtype (action; e.g. `organization` -> `member_added`)
-   * @param  _rewardBonus  uint   Number of tokens to send to contributor as a bonus (used for off-chain calculated values)
-   * @param  _deliveryID   string GitHub delivery ID of web hook request
-   * @return               bool   Returns boolean value when called from the parent contract;
+   * @param  _username      string GitHub username of contributor
+   * @param  _rewardValue   uint   Number of tokens rewarded to contributor
+   * @param  _reservedValue uint   Number of tokens reserved for auction
+   * @param  _deliveryID    string GitHub delivery ID of web hook request
+   * @return                bool   Returns boolean value when called from the parent contract;
    */
   function _rewardContributor (
     Data storage self,
     string _username,
-    string _rewardType,
-    string _reservedType,
-    uint _rewardBonus,
+    uint _rewardValue,
+    uint _reservedValue,
     string _deliveryID
   ) internal returns (bool) {
-    // Calculate total reward value for contribution event
-    uint _value = self.rewardValues[_rewardType].add(_rewardBonus);
-
-    // Calculate reserved value for contribution event
-    uint _reservedValue = self.reservedValues[_rewardType][_reservedType];
 
     // Get the contributor Ethereum address from GitHub username
     address _contributor = self.contributorAddresses[_username];
 
     // If no value is created, then throw the transaction;
-    require(_value > 0 || _reservedValue > 0);
+    require(_rewardValue > 0 || _reservedValue > 0);
 
     // If the GitHub web hook event ID has already occured, then throw the transaction;
     require(self.receivedDelivery[_deliveryID] == false);
     // Update totalSupply with the added values created, including the reserved supply for auction;
-    self.totalSupply = self.totalSupply.add(_value).add(_reservedValue);
+    self.totalSupply = self.totalSupply.add(_rewardValue).add(_reservedValue);
 
     // Add to the balance of reserved tokens held for auction by the contract
     self.balances[address(this)] = self.balances[address(this)].add(_reservedValue);
 
     // If the contributor is not yet verified, increase the unclaimed rewards for the user until the user verifies herself/himself;
     if (_contributor == 0x0){
-      self.unclaimedRewards[_username] = self.unclaimedRewards[_username].add(_value);
+      self.unclaimedRewards[_username] = self.unclaimedRewards[_username].add(_rewardValue);
     } else {
       // If the contributor's address is set, update the contributor's balance;
-      self.balances[_contributor] = self.balances[_contributor].add(_value);
+      self.balances[_contributor] = self.balances[_contributor].add(_rewardValue);
     }
 
     // Set the received deliveries for this event to true to prevent/mitigate event replay attacks;

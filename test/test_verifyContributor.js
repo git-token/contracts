@@ -20,6 +20,10 @@ function initContract() {
   })
 }
 
+function toBigNumber(value, decimals) {
+  return value * Math.pow(10, decimals)
+}
+
 contract('GitToken', function(accounts) {
   describe('GitToken::verifyContributor', function() {
 
@@ -33,7 +37,7 @@ contract('GitToken', function(accounts) {
         const { logs } = event
         assert.equal(logs[0]['event'], "ContributorVerified", "Expected a `ContributorVerified` event")
 
-        return gittoken.rewardContributor(username, "create", "", 0, "00000000-0000-0000-0000-000000000000")
+        return gittoken.rewardContributor(username, "organization_member_added", toBigNumber(2500, decimals), toBigNumber(2500, decimals), "00000000-0000-0000-0000-000000000000")
       }).then(function(event){
         const { logs } = event
         assert.equal(logs.length, 1, "Expect a logged event")
@@ -41,7 +45,7 @@ contract('GitToken', function(accounts) {
 
         return gittoken.balanceOf.call(contributorAddress)
       }).then(function(balance) {
-        assert.equal(balance.toNumber(), 2500 * Math.pow(10, decimals), "Expected balance of contributor to be 2500 * Math.pow(10, decimals)")
+        assert.equal(balance.toNumber(), toBigNumber(2500, decimals), "Expected balance of contributor to be toBigNumber(2500, decimals)")
 
         return gittoken.getUnclaimedRewards(username)
       }).then(function(unclaimedRewards) {
