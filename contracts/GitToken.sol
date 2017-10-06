@@ -275,7 +275,7 @@ contract GitToken is Ownable {
    */
   function rewardContributor(
     string _username,
-    string rewardType,
+    string _rewardType,
     uint _rewardValue,
     uint _reservedValue,
     string _deliveryID
@@ -345,16 +345,6 @@ contract GitToken is Ownable {
       );
   }
 
-
-  /**
-   * @dev Get the value associated with a GitHub web hook event
-   * @param  _rewardType  string  GitHub web hook event,
-   * @return _rewardValue uint256, _reservedType uint256 Reward value associated
-   * with GitHub web hook event and subtype (action);
-   */
-  function getRewardDetails(string _rewardType, string _reservedType) constant returns (uint256 _rewardValue, uint256 _reservedValue) {
-    return (gittoken.rewardValues[_rewardType], gittoken.reservedValues[_rewardType][_reservedType]);
-  }
 
   /**
    * @dev Get Ethereum address associated with contributor's GitHub username

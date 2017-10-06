@@ -20,6 +20,10 @@ function initContract() {
   })
 }
 
+function toBigNumber(value, decimals) {
+  return value * Math.pow(10, decimals)
+}
+
 contract('GitToken', function(accounts) {
   describe('GitToken::transfer', function() {
 
@@ -33,7 +37,7 @@ contract('GitToken', function(accounts) {
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "ContributorVerified", "Expected a `ContributorVerified` event")
 
-        return gittoken.rewardContributor(username, "create", "", 0, "00000000-0000-0000-0000-000000000000")
+        return gittoken.rewardContributor(username, "organization_member_added", toBigNumber(2500, decimals), toBigNumber(2500, decimals), "00000000-0000-0000-0000-000000000000")
       }).then(function(event){
         const { logs } = event
         assert.equal(logs.length, 1, "Expect a logged event")
