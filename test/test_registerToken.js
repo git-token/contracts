@@ -45,7 +45,7 @@ function initGitToken({ registry }) {
 contract('GitTokenRegistry', function(accounts) {
   describe('GitTokenRegistry::registerToken', function() {
 
-    it("Should register an organization token and emit a Registration event.", function() {
+    it(`Should create and register an organization token and emit a 'Registration' event.`, function() {
       var registry;
       var gittoken;
       return initRegistry().then((contract) => {
@@ -60,14 +60,19 @@ contract('GitTokenRegistry', function(accounts) {
         );
       }).then((event) => {
         const { logs } = event
-        const { args: { _organization, _symbol } } = logs[0]
+        const { args: { _organization, _symbol, _token } } = logs[0]
         console.log(JSON.stringify(logs, null, 2))
+
+        gittoken = _token
 
         assert.equal(logs.length, 1, "Expect a logged event")
         assert.equal(logs[0]['event'], "Registration", "Expected a `Registration` event")
         assert.equal(_organization, organization, `Expected registered organization, ${_organization} to equal, ${organization}`)
         assert.equal(_symbol, symbol, `Expected registered symbol, ${_symbol} to equal, ${symbol}`)
-        
+
+        return registry.getOrganizationToken(organization)
+      }).then((token) => {
+        assert.equal(gittoken, token, `Expected registered token, ${gittoken} to equal, ${token}`)
       }).catch(function(error) {
         assert.equal(error, null, error.message)
       })
