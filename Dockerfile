@@ -10,4 +10,4 @@ ADD . .
 
 RUN npm install
 
-CMD ["truffle", "test"]
+CMD ["truffle", "test", "./test/test_registerToken.js"]
