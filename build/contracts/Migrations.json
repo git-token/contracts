@@ -64,16 +64,10 @@
     "9": {
       "events": {},
       "links": {},
-      "address": "0xe10f9f4015f8564819be3c02d9956cbab13fb835",
-      "updated_at": 1509060032540
-    },
-    "1507258967413": {
-      "events": {},
-      "links": {},
-      "address": "0x7b28c7a0f30698eb8bac4ca91b373ad0ed3ad98a",
-      "updated_at": 1508977966951
+      "address": "0x68d13d8b305a26a47b68079e3dc07ecfc0f4eee8",
+      "updated_at": 1509060375331
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1509060032540
+  "updated_at": 1509060375331
 }

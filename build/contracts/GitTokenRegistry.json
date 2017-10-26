@@ -178,49 +178,10 @@
         }
       },
       "links": {},
-      "address": "0x2ef32d12d9dee7bb1e7675bcb773db96983825ff",
-      "updated_at": 1509060032537
-    },
-    "1507258967413": {
-      "events": {
-        "0xbf0936bc5d570f1c24dd6d0ca3092de3297c3eb6a96b748727954ca1d9a00444": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "name": "_organization",
-              "type": "string"
-            },
-            {
-              "indexed": false,
-              "name": "_token",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "name": "_symbol",
-              "type": "string"
-            },
-            {
-              "indexed": false,
-              "name": "_registeredBy",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "name": "date",
-              "type": "uint256"
-            }
-          ],
-          "name": "Registration",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0xe7a60c2432555bbf481efb972691e147a35e9161",
-      "updated_at": 1508977966948
+      "address": "0xf4e5f0a4656a765ef2eaae7a2710662ecc995143",
+      "updated_at": 1509060375331
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1509060032537
+  "updated_at": 1509060375331
 }
