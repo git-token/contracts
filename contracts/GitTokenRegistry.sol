@@ -1,9 +1,9 @@
 pragma solidity ^0.4.15;
 
-import './Ownable.sol';
+import './Admin.sol';
 import './GitToken.sol';
 
-contract GitTokenRegistry {
+contract GitTokenRegistry is Admin {
 
   struct Registry {
     mapping(string => GitToken) organizations;
@@ -17,6 +17,7 @@ contract GitTokenRegistry {
 
   function GitTokenRegistry(address _signer) public {
     registry = Registry({ signer: _signer });
+    admin[_signer] = true;
   }
 
 
@@ -48,5 +49,7 @@ contract GitTokenRegistry {
   function getOrganizationToken(string _organization) public constant returns (address _token) {
     return registry.organizations[_organization];
   }
+
+  function () public { revert(); }
 
 }
