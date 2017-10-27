@@ -44,7 +44,7 @@ contract GitTokenRegistry is Admin {
     registry.organizations[_organization] = token;
     registry.registered[_organization] = true;
     Registration(_organization, token, _symbol, _admin, now);
-    return success;
+    return true;
   }
 
 
@@ -55,7 +55,7 @@ contract GitTokenRegistry is Admin {
   function () public { revert(); }
 
   modifier isRegistered(string _organization) {
-    require(!registry.registered[_organization]);
+    require(registry.registered[_organization] == false);
     _;
   }
 
