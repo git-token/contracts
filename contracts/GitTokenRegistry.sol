@@ -7,6 +7,7 @@ contract GitTokenRegistry is Admin {
 
   struct Registry {
     mapping(string => GitToken) organizations;
+    mapping(string => bool) registered;
     address signer;
   }
 
@@ -28,7 +29,7 @@ contract GitTokenRegistry is Admin {
     uint256 _decimals,
     address _admin,
     string _username
-  ) public returns (bool success) {
+  ) isRegistered(_organization) public returns (bool success) {
 
     GitToken token = new GitToken(
       _organization,
@@ -41,6 +42,7 @@ contract GitTokenRegistry is Admin {
     );
 
     registry.organizations[_organization] = token;
+    registry.registered[_organization] = true;
     Registration(_organization, token, _symbol, _admin, now);
     return success;
   }
@@ -51,5 +53,10 @@ contract GitTokenRegistry is Admin {
   }
 
   function () public { revert(); }
+
+  modifier isRegistered(string _organization) {
+    require(!registry.registered[_organization]);
+    _;
+  }
 
 }
