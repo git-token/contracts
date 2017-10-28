@@ -21,6 +21,7 @@
 
 pragma solidity ^0.4.15;
 
+import './SafeMath.sol';
 
 /**
  * @title GitToken Contract for distributing ERC20 tokens for Git contributions;
@@ -28,13 +29,15 @@ pragma solidity ^0.4.15;
  */
 contract GitToken {
 
+  using SafeMath for uint;
+
   struct Data {
     uint totalSupply;
     uint decimals;
     string name;
     string organization;
     string symbol;
-    address signer;
+    address registry;
     string username;
     mapping(address => bool) admin;
     mapping(address => mapping(address => uint)) allowed;
@@ -59,12 +62,14 @@ contract GitToken {
    */
   event Transfer(address indexed from, address indexed to, uint value);
 
+  event Credited(address indexed contributor, uint value);
+
   function GitToken(
     string _organization,
     string _name,
     string _symbol,
     uint256 _decimals,
-    address _signer,
+    address _registry,
     address _admin,
     string _username
   ) public {
@@ -77,7 +82,7 @@ contract GitToken {
     data.symbol = _symbol;
 
     // Set Operator Settings
-    data.signer = _signer;
+    data.registry = _registry;
     data.admin[_admin] = true;
     data.username = _username;
   }
@@ -203,11 +208,29 @@ contract GitToken {
     return data.allowed[_owner][_spender];
   }
 
+
+  function credit(address _contributor, uint _value)
+    onlyRegistry
+    public
+    returns (bool success)
+  {
+    data.balances[_contributor].add(_value);
+    data.totalSupply.add(_value);
+    Credited(_contributor, _value);
+    return true;
+  }
+
+
   /**
    * Fallback function; does nothing; reverts the transaction
    */
   function () public {
     revert();
+  }
+
+  modifier onlyRegistry() {
+    require(msg.sender == data.registry);
+    _;
   }
 
   /**
