@@ -11,6 +11,7 @@ contract GitTokenRegistry is Admin {
     mapping(address => bool) blacklist;
     mapping(bytes32 => bool) activeRequests;
     address signer;
+    uint256 registrationFee;
   }
 
   Registry registry;
@@ -18,13 +19,26 @@ contract GitTokenRegistry is Admin {
   event TokenRegistered(string _organization, address _token, string _symbol, address _registeredBy, uint _date);
   event TokenRequested(address _token, address _contributor, uint _value, uint _date, uint _expiration, bytes32 _requestId);
   event TokenRedeemed(address _token, address _contributor, uint _value, uint _date, bytes32 _requestId);
-
+  event OrganizationVerified(string _organization, address _admin, string _name, uint _decimals, string _symbol, string _username);
 
   function GitTokenRegistry(address _signer) public {
-    registry = Registry({ signer: _signer });
+    registry = Registry({ signer: _signer, registrationFee: 30 * 10 ** 14 });
     admin[_signer] = true;
   }
 
+  function verifyOrginization(
+    string _organization,
+    string _username,
+    string _name,
+    uint _decimals,
+    string symbol
+  ) payable isRegistered(_organization) public returns (bool success) {
+    require(msg.value >= registry.registrationFee);
+    registry.register[_organization] = true;
+    registry.signer.transfer(msg.value);
+    OrganizationVerified(_organization, msg.sender, _name, _decimals, _symbol, _username);
+    return true;
+  }
 
   function registerToken(
     string _organization,
@@ -33,7 +47,9 @@ contract GitTokenRegistry is Admin {
     uint256 _decimals,
     address _admin,
     string _username
-  ) isRegistered(_organization) public returns (bool success) {
+  ) onlySigner public returns (bool success) {
+    
+    require(registry.registered[_organization]);
 
     GitToken token = new GitToken(
       _organization,
@@ -46,7 +62,7 @@ contract GitTokenRegistry is Admin {
     );
 
     registry.organizations[_organization] = token;
-    registry.registered[_organization] = true;
+
     TokenRegistered(_organization, token, _symbol, _admin, now);
     return true;
   }
