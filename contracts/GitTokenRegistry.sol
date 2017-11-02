@@ -32,13 +32,14 @@ contract GitTokenRegistry is Admin {
 
   function verifyOrginization(
     string _organization,
-    string _username
+    string _username,
+    address _admin
   )
   signer
   public returns (bool success)
   {
-    registry.verified[_organization][msg.sender] = true;
-    OrganizationVerified(_organization, msg.sender, _username);
+    registry.verified[_organization][_admin] = true;
+    OrganizationVerified(_organization, _admin, _username);
     return true;
   }
 
