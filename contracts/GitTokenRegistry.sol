@@ -8,6 +8,7 @@ contract GitTokenRegistry is Admin {
   struct Registry {
     mapping(string => GitToken) organizations;
     mapping(string => bool) registered;
+    mapping(string => mapping(address => bool)) verified;
     mapping(address => bool) blacklist;
     mapping(bytes32 => bool) activeRequests;
     address signer;
@@ -19,24 +20,25 @@ contract GitTokenRegistry is Admin {
   event TokenRegistered(string _organization, address _token, string _symbol, address _registeredBy, uint _date);
   event TokenRequested(address _token, address _contributor, uint _value, uint _date, uint _expiration, bytes32 _requestId);
   event TokenRedeemed(address _token, address _contributor, uint _value, uint _date, bytes32 _requestId);
-  event OrganizationVerified(string _organization, address _admin, string _name, uint _decimals, string _symbol, string _username);
+  event OrganizationVerified(string _organization, address _admin, string _username);
 
   function GitTokenRegistry(address _signer) public {
-    registry = Registry({ signer: _signer, registrationFee: 30 * 10 ** 14 });
+    registry = Registry({
+      signer: _signer,
+      registrationFee: 30 * 10 ** 14 // This fee should cover signer tx costs (e.g. verifyOrganization())
+    });
     admin[_signer] = true;
   }
 
   function verifyOrginization(
     string _organization,
-    string _username,
-    string _name,
-    uint _decimals,
-    string symbol
-  ) payable isRegistered(_organization) public returns (bool success) {
-    require(msg.value >= registry.registrationFee);
-    registry.register[_organization] = true;
-    registry.signer.transfer(msg.value);
-    OrganizationVerified(_organization, msg.sender, _name, _decimals, _symbol, _username);
+    string _username
+  )
+  signer
+  public returns (bool success)
+  {
+    registry.verified[_organization][msg.sender] = true;
+    OrganizationVerified(_organization, msg.sender, _username);
     return true;
   }
 
@@ -47,9 +49,13 @@ contract GitTokenRegistry is Admin {
     uint256 _decimals,
     address _admin,
     string _username
-  ) onlySigner public returns (bool success) {
-    
-    require(registry.registered[_organization]);
+  )
+  payable
+  verified(_organization)
+  unregistered(_organization)
+  public returns (bool success)
+  {
+    /*require(msg.value >= registry.registrationFee);*/
 
     GitToken token = new GitToken(
       _organization,
@@ -62,7 +68,7 @@ contract GitTokenRegistry is Admin {
     );
 
     registry.organizations[_organization] = token;
-
+    registry.registered[_organization] = true;
     TokenRegistered(_organization, token, _symbol, _admin, now);
     return true;
   }
@@ -90,7 +96,7 @@ contract GitTokenRegistry is Admin {
     uint _value,
     bytes32 _requestId
   )
-    onlySigner
+    signer
     public
     returns (bool success)
   {
@@ -117,17 +123,28 @@ contract GitTokenRegistry is Admin {
 
   function () public { revert(); }
 
-  modifier onlySigner() {
+  modifier signer() {
     require(registry.signer == msg.sender);
     _;
   }
 
-  modifier isRegistered(string _organization) {
+  modifier unregistered(string _organization) {
     require(registry.registered[_organization] == false);
     _;
   }
 
-  modifier isBlacklisted(address _token) {
+  modifier registered(string _organization) {
+    require(registry.registered[_organization] == true);
+    _;
+  }
+
+  modifier verified(string _organization) {
+    require(registry.verified[_organization][msg.sender] == true);
+    _;
+  }
+
+
+  modifier blacklisted(address _token) {
     require(registry.blacklist[_token] == false);
     _;
   }
