@@ -30,7 +30,7 @@ contract GitTokenRegistry is Admin {
     admin[_signer] = true;
   }
 
-  function verifyOrginization(
+  function verifyOrganization(
     string _organization,
     string _username,
     address _admin
