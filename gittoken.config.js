@@ -13,5 +13,5 @@ module.exports = {
   // symbol is the desired symbol for your ERC20-compatible GitToken
   symbol: 'GTK',
   decimals: 8,
-  signer: "0x6d67f756d8a97828f3d93ea6f6f68a4b50a4e179"
+  signer: "0xccba5a7f2e12ff931bcfe8f163c1f982a45c2907"
 }
