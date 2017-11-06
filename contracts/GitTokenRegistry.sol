@@ -117,6 +117,10 @@ contract GitTokenRegistry is Admin {
     return registry.organizations[_organization];
   }
 
+  function getSigner() public constant returns (address _signer) {
+    return registry.signer;
+  }
+
   function blacklist(address _token) onlyAdmin public returns (bool success) {
     registry.blacklist[_token] = true;
     return true;
