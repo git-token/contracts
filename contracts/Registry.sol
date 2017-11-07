@@ -50,12 +50,10 @@ contract Registry is Admin {
     uint256 _decimals,
     string _username
   )
-  payable
   verified(_organization)
   unregistered(_organization)
   public returns (bool success)
   {
-    /*require(msg.value >= registry.registrationFee);*/
 
     GitToken token = new GitToken(
       _organization,
