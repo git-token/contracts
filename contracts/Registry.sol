@@ -48,7 +48,6 @@ contract Registry is Admin {
     string _name,
     string _symbol,
     uint256 _decimals,
-    address _admin,
     string _username
   )
   payable
@@ -64,13 +63,13 @@ contract Registry is Admin {
       _symbol,
       _decimals,
       address(this),
-      _admin,
+      msg.sender,
       _username
     );
 
     registry.organizations[_organization] = token;
     registry.registered[_organization] = true;
-    TokenRegistered(_organization, token, _symbol, _admin, now);
+    TokenRegistered(_organization, token, _symbol, msg.sender, now);
     return true;
   }
 
