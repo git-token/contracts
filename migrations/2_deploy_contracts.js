@@ -1,9 +1,9 @@
-const GitTokenRegistry = artifacts.require('./GitTokenRegistry.sol');
+const Registry = artifacts.require('./Registry.sol');
 const { signer } = require('../gittoken.config.js')
 
 module.exports = function(deployer) {
   deployer.deploy(
-    GitTokenRegistry,
+    Registry,
     signer
   ).then((contract) => {
     console.log('contract', contract)

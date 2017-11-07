@@ -1,4 +1,4 @@
-var GitTokenRegistry = artifacts.require("./GitTokenRegistry.sol");
+var Registry = artifacts.require("./Registry.sol");
 var GitToken = artifacts.require("./GitToken.sol");
 var Promise = require("bluebird")
 const {
@@ -14,7 +14,7 @@ const {
 
 function initRegistry() {
   return new Promise((resolve, reject) => {
-    GitTokenRegistry.new(
+    Registry.new(
       signer
     ).then(function(registry) {
       resolve(registry)
@@ -42,8 +42,8 @@ function initGitToken({ registry }) {
   })
 }
 
-contract('GitTokenRegistry', function(accounts) {
-  describe('GitTokenRegistry::registerToken', function() {
+contract('Registry', function(accounts) {
+  describe('Registry::registerToken', function() {
 
     it(`Should create and register an organization token and emit a 'Registration' event.`, function() {
       var registry;

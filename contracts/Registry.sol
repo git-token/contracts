@@ -3,9 +3,9 @@ pragma solidity ^0.4.15;
 import './Admin.sol';
 import './GitToken.sol';
 
-contract GitTokenRegistry is Admin {
+contract Registry is Admin {
 
-  struct Registry {
+  struct Data {
     mapping(string => GitToken) organizations;
     mapping(string => bool) registered;
     mapping(string => mapping(address => bool)) verified;
@@ -15,15 +15,15 @@ contract GitTokenRegistry is Admin {
     uint256 registrationFee;
   }
 
-  Registry registry;
+  Data registry;
 
   event TokenRegistered(string _organization, address _token, string _symbol, address _registeredBy, uint _date);
   event TokenRequested(address _token, address _contributor, uint _value, uint _date, uint _expiration, bytes32 _requestId);
   event TokenRedeemed(address _token, address _contributor, uint _value, uint _date, bytes32 _requestId);
   event OrganizationVerified(string _organization, address _admin, string _username);
 
-  function GitTokenRegistry(address _signer) public {
-    registry = Registry({
+  function Registry(address _signer) public {
+    registry = Data({
       signer: _signer,
       registrationFee: 30 * 10 ** 14 // This fee should cover signer tx costs (e.g. verifyOrganization())
     });
