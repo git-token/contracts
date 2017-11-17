@@ -1,8 +1,8 @@
 pragma solidity ^0.4.15;
 
 
-contract GitTokenRelay {
+contract Relay {
 
-  function GitTokenRelay() public {}
+  function Relay() public {}
   function () public { revert(); }
 }
