@@ -3,7 +3,7 @@ pragma solidity ^0.4.15;
 import './RewardPoints.sol';
 
 
-contract GitTokenRelay {
+contract GitTokenRelay is RewardPoints {
 
   struct Data {
     uint totalSupply;

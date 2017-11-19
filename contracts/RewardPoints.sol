@@ -6,14 +6,7 @@ contract RewardPoints {
   mapping(string => mapping(string => uint)) reservedValues;
 
 
-  function RewardPoints(uint _decimals) {
-
-    /*
-
-    NOTE: Beginning of Reward Values
-
-    */
-
+  function RewardPoints(uint256 _decimals) {
     // Any time a Commit is commented on.
     rewardValues['commit_comment']['created']        = 250 * 10**_decimals;
 
@@ -119,7 +112,7 @@ contract RewardPoints {
     rewardValues['project_column']['deleted']            = 0 * 10**_decimals;
 
     // Any time a Project is created, edited, closed, reopened, or deleted.
-    rewardValues['project']['created']                  = 500 * 10**_decimals;
+    rewardValues['project']['created']                  = 2500 * 10**_decimals;
     rewardValues['project']['edited']                   = 100 * 10**_decimals;
     rewardValues['project']['closed']                   = 500 * 10**_decimals;
     rewardValues['project']['reopened']                 = 100 * 10**_decimals;
@@ -142,8 +135,8 @@ contract RewardPoints {
     rewardValues['pull_request']['unlabeled']              = 0 * 10**_decimals;
     rewardValues['pull_request']['opened']                 = 100 * 10**_decimals;
     rewardValues['pull_request']['edited']                 = 50 * 10**_decimals;
-    rewardValues['pull_request']['closed']                 = 100 * 10**_decimals; // payload.merged
-    rewardValues['pull_request']['reopened']               = 0 * 10**_decimals;
+    rewardValues['pull_request']['closed']                 = 100 * 10**_decimals;
+    rewardValues['pull_request']['reopened']               = 15 * 10**_decimals;
 
     // Use when setting up the webhook for github
     rewardValues['ping']['']                               = 2500 * 10**_decimals;
@@ -157,7 +150,7 @@ contract RewardPoints {
     // Any time a Repository is created, deleted (organization hooks only), made public, or made private.
     rewardValues['repository']['created']                  = 1000 * 10**_decimals;
     rewardValues['repository']['deleted']                  = 0 * 10**_decimals;
-    rewardValues['repository']['publicized']               = 250 * 10**_decimals;
+    rewardValues['repository']['publicized']               = 2500 * 10**_decimals;
     rewardValues['repository']['privatized']               = 0 * 10**_decimals;
 
     // Any time a Repository has a status update from the API
@@ -177,15 +170,8 @@ contract RewardPoints {
     rewardValues['team_add']['']                          = 1000 * 10**_decimals;
 
     // Any time a User stars a Repository.
-    rewardValues['watch']['started']                      = 100 * 10**_decimals;
+    rewardValues['watch']['started']                      = 500 * 10**_decimals;
 
-
-    /*
-
-    NOTE: Beginning of Reserved Values -- Values reserved for liquidation events
-
-
-     */
 
     // Any time a Commit is commented on.
     reservedValues['commit_comment']['created']           = 0 * 10**_decimals;
@@ -292,9 +278,9 @@ contract RewardPoints {
     reservedValues['project_column']['deleted']            = 0 * 10**_decimals;
 
     // Any time a Project is created, edited, closed, reopened, or deleted.
-    reservedValues['project']['created']                  = 500 * 10**_decimals;
+    reservedValues['project']['created']                  = 2500 * 10**_decimals;
     reservedValues['project']['edited']                   = 0 * 10**_decimals;
-    reservedValues['project']['closed']                   = 0 * 10**_decimals;
+    reservedValues['project']['closed']                   = 500 * 10**_decimals;
     reservedValues['project']['reopened']                 = 0 * 10**_decimals;
 
 
@@ -354,7 +340,7 @@ contract RewardPoints {
     reservedValues['watch']['started']                      = 500 * 10**_decimals;
   }
 
-  getValues(string _event, string _subtype) public external returns (uint _rewardValue, _reserveValue) {
+  function getRewardDetails(string _event, string _subtype) public returns (uint _rewardValue, uint _reserveValue) {
     return (rewardValues[_event][_subtype], reservedValues[_event][_subtype]);
   }
 
