@@ -1,10 +1,10 @@
-const Registry = artifacts.require('./Registry.sol');
-const { signer } = require('../gittoken.config.js')
+const RewardPoints = artifacts.require('./RewardPoints.sol');
+const { admin } = require('../gittoken.config.js')
 
 module.exports = function(deployer) {
   deployer.deploy(
-    Registry,
-    signer
+    RewardPoints,
+    admin
   ).then((contract) => {
     console.log('contract', contract)
   }).catch((error) => {
