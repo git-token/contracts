@@ -140,6 +140,7 @@ contract RewardPoints is Ownable {
     rewardValues['pull_request']['edited']                 = 50 * 10**decimals;
     rewardValues['pull_request']['closed']                 = 100 * 10**decimals;
     rewardValues['pull_request']['reopened']               = 15 * 10**decimals;
+    rewardValues['pull_request']['synchronize']            = 150 * 10**decimals;
 
     // Use when setting up the webhook for github
     rewardValues['ping']['']                               = 2500 * 10**decimals;
@@ -307,6 +308,7 @@ contract RewardPoints is Ownable {
     reservedValues['pull_request']['edited']                 = 0 * 10**decimals;
     reservedValues['pull_request']['closed']                 = 0 * 10**decimals; // payload.merged
     reservedValues['pull_request']['reopened']               = 0 * 10**decimals;
+    reservedValues['pull_request']['synchronize']            = 0 * 10**decimals;
 
     // Use when setting up the webhook for github
     reservedValues['ping']['']                               = 5000 * 10**decimals;

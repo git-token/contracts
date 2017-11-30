@@ -1,6 +1,6 @@
 {
   "name": "gittoken-contracts",
-  "version": "0.0.58",
+  "version": "0.0.59",
   "description": "GitToken Solidity Smart Contracts",
   "main": "",
   "scripts": {
