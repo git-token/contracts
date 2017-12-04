@@ -9,7 +9,7 @@ contract GitTokenAuction is Signed {
   using SafeMath for uint;
   using SafeMath for uint[];
 
-  struct Auction {
+  struct AuctionDetails {
     uint startDate;
     uint endDate;
     uint lockDate;
@@ -22,10 +22,11 @@ contract GitTokenAuction is Signed {
     uint[] prices;
   }
 
-  mapping(address => mapping(uint => Auction)) auctions;
+  mapping(address => mapping(uint => AuctionDetails)) auctions;
   mapping(address => uint) rounds;
+  uint public fee;
 
-  event NewAuction(
+  event Auction(
     address indexed gittoken,
     uint round,
     uint startDate,
@@ -34,22 +35,31 @@ contract GitTokenAuction is Signed {
     uint initialPrice
   );
 
-  event Bid(address indexed gittoken, address bidder, uint round, uint price, uint tokens, uint value);
+  event Bid(
+    address indexed gittoken,
+    address bidder,
+    uint round,
+    uint price,
+    uint tokens,
+    uint value
+  );
 
-  function GitTokenAuction() Signed(msg.sender) public {}
+  function GitTokenAuction(uint _fee) Signed(msg.sender) public {
+    fee = _fee > 0 ? _fee : 10**15; // 0.0001 ETH
+  }
 
   function init(address _gittoken, uint _minPrice) onlyGitTokenSigner(_gittoken) public returns(bool success) {
-      /*require(auctions[_gittoken][rounds[_gittoken]].endDate < now); //*/
+      require(auctions[_gittoken][rounds[_gittoken]].endDate < now); //
       require(GitToken(_gittoken).balanceOf(address(this)) > 0); // ensure contract has tokens to auction
 
       rounds[_gittoken] += 1;
 
-      auctions[_gittoken][rounds[_gittoken]].startDate = now + 86400*3; // t+3 days
+      auctions[_gittoken][rounds[_gittoken]].startDate = now; // + 86400*3; // t+3 days
       auctions[_gittoken][rounds[_gittoken]].endDate = now + 86400*12; // t+12 days
       auctions[_gittoken][rounds[_gittoken]].tokensOffered = GitToken(_gittoken).balanceOf(address(this)); // currently held token balance
       auctions[_gittoken][rounds[_gittoken]].initialPrice = _minPrice;
 
-      NewAuction(
+      Auction(
         _gittoken,
         rounds[_gittoken],
         auctions[_gittoken][rounds[_gittoken]].startDate,
@@ -72,24 +82,34 @@ contract GitTokenAuction is Signed {
         auctions[_gittoken][rounds[_gittoken]].prices
       );
 
-    uint tokens = (msg.value / auctions[_gittoken][rounds[_gittoken]].wtdAvgPrice);
+    uint tokens = (msg.value / auctions[_gittoken][rounds[_gittoken]].wtdAvgPrice) * 10 ** GitToken(_gittoken).decimals();
+    uint funds = msg.value - fee;
 
     require(GitToken(_gittoken).transfer(msg.sender, tokens));
+    require(_gittoken.send(funds));
 
-    Bid(_gittoken,
+    Bid(
+      _gittoken,
       msg.sender,
       rounds[_gittoken],
       auctions[_gittoken][rounds[_gittoken]].wtdAvgPrice,
       tokens,
-      msg.value
+      funds
     );
 
     return true;
   }
 
+  function withdraw(address _gittoken) onlyGitTokenSigner(_gittoken) public returns (bool success) {
+    require(auctions[_gittoken][rounds[_gittoken]].endDate < now);
+    uint tokens = GitToken(_gittoken).balanceOf(address(this));
+    require(GitToken(_gittoken).transfer(_gittoken, tokens));
+    return true;
+  }
+
   modifier validate(address _gittoken, uint _price) {
-      /*require(auctions[_gittoken][rounds[_gittoken]].startDate <= now); // ensure the start date as started
-      require(auctions[_gittoken][rounds[_gittoken]].endDate >= now); // ensure that the end date has not expired*/
+      require(auctions[_gittoken][rounds[_gittoken]].startDate <= now); // ensure the start date as started
+      require(auctions[_gittoken][rounds[_gittoken]].endDate >= now); // ensure that the end date has not expired
       require(msg.value >= _price && _price > 0);
       _;
   }

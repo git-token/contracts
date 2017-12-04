@@ -186,7 +186,7 @@ contract GitToken is Signed {
    * @param  _value   uint    Number of tokens to transfer,
    * returns          bool    Returns boolean value if method is called
    */
-  function transfer(address _to, uint _value ) public returns (bool) {
+  function transfer(address _to, uint _value ) public onlyPayloadSize(2) returns (bool) {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
     Transfer(msg.sender, _to, _value);
@@ -241,21 +241,16 @@ contract GitToken is Signed {
     require(_recipients.length == _values.length);
     for (uint i = 0; i < _recipients.length; i++) {
         balances[_recipients[i]] = balances[_recipients[i]].add(_values[i]);
+        supply = supply.add(_values[i]);
         Distributed(_recipients[i], _values[i]);
     }
 
-    supply = supply.add(_values.sum());
 
     return true;
   }
 
 
-  /**
-   * Fallback function; does nothing; reverts the transaction
-   */
-  function() public {
-    revert();
-  }
+  function() payable public {}
 
   /**
    * @dev This modifier checks the data length to ensure that it matches the padded
