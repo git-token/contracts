@@ -1,18 +1,230 @@
 {
-  "contract_name": "GitTokenVoting",
+  "contractName": "GitTokenVoting",
   "abi": [
     {
       "inputs": [],
       "payable": false,
+      "stateMutability": "nonpayable",
       "type": "constructor"
     },
     {
       "payable": false,
+      "stateMutability": "nonpayable",
       "type": "fallback"
     }
   ],
-  "unlinked_binary": "0x60606040523415600e57600080fd5b5b5b5b604380601e6000396000f30060606040525b3415600f57600080fd5b5b600080fd5b0000a165627a7a7230582094155fd332c702e958480514dbd8ba5277bfcb3249bc745acc96377a044e4bd70029",
+  "bytecode": "0x60606040523415600e57600080fd5b603f80601b6000396000f30060606040523415600e57600080fd5b600080fd00a165627a7a72305820a61320f9a44ff4a30ed3df783119069d23c1e6fb55884015a40ff4fd1225411c0029",
+  "deployedBytecode": "0x60606040523415600e57600080fd5b600080fd00a165627a7a72305820a61320f9a44ff4a30ed3df783119069d23c1e6fb55884015a40ff4fd1225411c0029",
+  "sourceMap": "27:101:12:-;;;56:35;;;;;;;;27:101;;;;;;",
+  "deployedSourceMap": "27:101:12:-;;;;;;;;;;;115:8;;",
+  "source": "pragma solidity ^0.4.15;\n\n\ncontract GitTokenVoting {\n\n  function GitTokenVoting() public {}\n  function () public { revert(); }\n}\n",
+  "sourcePath": "/Users/ryan/Projects/GitToken/gittoken-contracts/contracts/Voting.sol",
+  "ast": {
+    "attributes": {
+      "absolutePath": "/Users/ryan/Projects/GitToken/gittoken-contracts/contracts/Voting.sol",
+      "exportedSymbols": {
+        "GitTokenVoting": [
+          5688
+        ]
+      }
+    },
+    "children": [
+      {
+        "attributes": {
+          "literals": [
+            "solidity",
+            "^",
+            "0.4",
+            ".15"
+          ]
+        },
+        "id": 5676,
+        "name": "PragmaDirective",
+        "src": "0:24:12"
+      },
+      {
+        "attributes": {
+          "baseContracts": [
+            null
+          ],
+          "contractDependencies": [
+            null
+          ],
+          "contractKind": "contract",
+          "documentation": null,
+          "fullyImplemented": true,
+          "linearizedBaseContracts": [
+            5688
+          ],
+          "name": "GitTokenVoting",
+          "scope": 5689
+        },
+        "children": [
+          {
+            "attributes": {
+              "constant": false,
+              "implemented": true,
+              "isConstructor": true,
+              "modifiers": [
+                null
+              ],
+              "name": "GitTokenVoting",
+              "payable": false,
+              "scope": 5688,
+              "stateMutability": "nonpayable",
+              "superFunction": null,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 5677,
+                "name": "ParameterList",
+                "src": "79:2:12"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 5678,
+                "name": "ParameterList",
+                "src": "89:0:12"
+              },
+              {
+                "attributes": {
+                  "statements": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 5679,
+                "name": "Block",
+                "src": "89:2:12"
+              }
+            ],
+            "id": 5680,
+            "name": "FunctionDefinition",
+            "src": "56:35:12"
+          },
+          {
+            "attributes": {
+              "constant": false,
+              "implemented": true,
+              "isConstructor": false,
+              "modifiers": [
+                null
+              ],
+              "name": "",
+              "payable": false,
+              "scope": 5688,
+              "stateMutability": "nonpayable",
+              "superFunction": null,
+              "visibility": "public"
+            },
+            "children": [
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 5681,
+                "name": "ParameterList",
+                "src": "103:2:12"
+              },
+              {
+                "attributes": {
+                  "parameters": [
+                    null
+                  ]
+                },
+                "children": [],
+                "id": 5682,
+                "name": "ParameterList",
+                "src": "113:0:12"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "attributes": {
+                          "argumentTypes": null,
+                          "arguments": [
+                            null
+                          ],
+                          "isConstant": false,
+                          "isLValue": false,
+                          "isPure": false,
+                          "isStructConstructorCall": false,
+                          "lValueRequested": false,
+                          "names": [
+                            null
+                          ],
+                          "type": "tuple()",
+                          "type_conversion": false
+                        },
+                        "children": [
+                          {
+                            "attributes": {
+                              "argumentTypes": [
+                                null
+                              ],
+                              "overloadedDeclarations": [
+                                null
+                              ],
+                              "referencedDeclaration": 5704,
+                              "type": "function () pure",
+                              "value": "revert"
+                            },
+                            "id": 5683,
+                            "name": "Identifier",
+                            "src": "115:6:12"
+                          }
+                        ],
+                        "id": 5684,
+                        "name": "FunctionCall",
+                        "src": "115:8:12"
+                      }
+                    ],
+                    "id": 5685,
+                    "name": "ExpressionStatement",
+                    "src": "115:8:12"
+                  }
+                ],
+                "id": 5686,
+                "name": "Block",
+                "src": "113:13:12"
+              }
+            ],
+            "id": 5687,
+            "name": "FunctionDefinition",
+            "src": "94:32:12"
+          }
+        ],
+        "id": 5688,
+        "name": "ContractDefinition",
+        "src": "27:101:12"
+      }
+    ],
+    "id": 5689,
+    "name": "SourceUnit",
+    "src": "0:129:12"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.18+commit.9cf6e910.Emscripten.clang"
+  },
   "networks": {},
-  "schema_version": "0.0.5",
-  "updated_at": 1512018533468
+  "schemaVersion": "1.0.1",
+  "updatedAt": "2017-12-04T00:45:58.916Z"
 }
